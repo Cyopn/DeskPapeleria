@@ -1,0 +1,75 @@
+# Visual Studio
+*.user
+*.suo
+*.tmp
+*.temp
+*.swp
+*.bak
+*.log
+
+# Build outputs
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+
+# NuGet
+packages/
+*.nupkg
+*.snupkg
+project.lock.json
+project.fragment.lock.json
+
+# .NET Core
+artifacts/
+*.cache
+*.pdb
+*.exe
+*.dll
+
+# IDE
+.vscode/
+.vs/
+.idea/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# User-specific files
+*.user
+*.suo
+*.tmp
+*.temp
+
+# Logs
+*.log
+logs/
+
+# Test results
+TestResults/
+*.trx
+
+# Coverage
+*.coverage
+*.coveragexml
+
+# WPF specific
+*.baml
+*.g.cs
+*.g.i.cs
+*.g.resources
+*.lref
+*.wpftmp
