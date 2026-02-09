@@ -5,9 +5,152 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DeskApp"
         mc:Ignorable="d"
-        ResizeMode="CanMinimize"
-        Title="MainWindow" Height="450" Width="800">
+        Title="w" 
+        Height="700" 
+        Width="1050"
+        MinHeight="700" 
+        MinWidth="1050"
+        WindowState="Maximized">
+    <Window.Resources>
+        <Style x:Key="RoundedButtonStyle" TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="20">
+                            <Border.Effect>
+                                <DropShadowEffect x:Name="shadow" 
+                                                  ShadowDepth="3" 
+                                                  BlurRadius="5" 
+                                                  Opacity="0.3"/>
+                            </Border.Effect>
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center"
+                                              TextBlock.Foreground="{TemplateBinding Foreground}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="shadow"
+                                                             Storyboard.TargetProperty="ShadowDepth"
+                                                             To="8"
+                                                             Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="shadow"
+                                                             Storyboard.TargetProperty="BlurRadius"
+                                                             To="15"
+                                                             Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="shadow"
+                                                             Storyboard.TargetProperty="ShadowDepth"
+                                                             To="3"
+                                                             Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="shadow"
+                                                             Storyboard.TargetProperty="BlurRadius"
+                                                             To="5"
+                                                             Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                            <Trigger 
+                                Property="IsPressed" 
+                                Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="shadow"
+                                                             Storyboard.TargetProperty="ShadowDepth"
+                                                             To="1"
+                                                             Duration="0:0:0.1"/>
+                                            <DoubleAnimation Storyboard.TargetName="shadow"
+                                                             Storyboard.TargetProperty="BlurRadius"
+                                                             To="3"
+                                                             Duration="0:0:0.1"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
     <Grid>
-        <Image x:Name="index" HorizontalAlignment="Left" Height="250" Margin="40,0,0,0" VerticalAlignment="Top" Width="720"/>
+        <Image 
+            Stretch="Fill" 
+            VerticalAlignment="Stretch" 
+            HorizontalAlignment="Stretch">
+            <Image.Source>
+                <BitmapImage 
+                    UriSource="pack://application:,,,/Resources/bg-main.png"/>
+            </Image.Source>
+        </Image>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="2*"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0"/>
+            <Border Grid.Row="1" 
+                  Background="White"
+                  CornerRadius="60,60,0,0">
+                <Grid Margin="30">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0" 
+                            Content="Iniciar sesión"
+                            Margin="20"
+                            MinWidth="100"
+                            MinHeight="40"
+                            MaxWidth="500"
+                            MaxHeight="80"
+                            HorizontalAlignment="Stretch" 
+                            VerticalAlignment="Center" 
+                            FontSize="35" 
+                            FontFamily="Dubai Medium"
+                            Foreground="White"
+                            BorderThickness="0"
+                            Style="{StaticResource RoundedButtonStyle}"
+                            Background="#0F71F2"
+                            Cursor="Hand" 
+                            Click="LwButton_Click"/>
+
+                    <Button Grid.Column="1" 
+                            Content="Registrate" 
+                            Margin="20"
+                            MinWidth="100"
+                            MinHeight="40"
+                            MaxWidth="500"
+                            MaxHeight="80"
+                            HorizontalAlignment="Stretch" 
+                            VerticalAlignment="Center" 
+                            FontSize="35" 
+                            FontFamily="Dubai Medium"
+                            Foreground="White"
+                            BorderThickness="0"
+                            Style="{StaticResource RoundedButtonStyle}"
+                            Background="#000000"
+                            Cursor="Hand"
+                            Click="RwButton_Click"/>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </Window>

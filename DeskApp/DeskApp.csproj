@@ -8,4 +8,43 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Resources\bg-employee.png" />
+    <None Remove="Resources\bg-login.png" />
+    <None Remove="Resources\bg-main.png" />
+    <None Remove="Resources\bg-register.png" />
+    <None Remove="Resources\boxes.png" />
+    <None Remove="Resources\employee.png" />
+    <None Remove="Resources\en.png" />
+    <None Remove="Resources\lock.png" />
+    <None Remove="Resources\phone.png" />
+    <None Remove="Resources\printer.png" />
+    <None Remove="Resources\user.png" />
+    <None Remove="appsettings.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\bg-employee.png" />
+    <Resource Include="Resources\bg-login.png" />
+    <Resource Include="Resources\bg-main.png" />
+    <Resource Include="Resources\bg-register.png" />
+    <Resource Include="Resources\boxes.png" />
+    <Resource Include="Resources\employee.png" />
+    <Resource Include="Resources\en.png" />
+    <Resource Include="Resources\lock.png" />
+    <Resource Include="Resources\phone.png" />
+    <Resource Include="Resources\printer.png" />
+    <Resource Include="Resources\user.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Utilities\" />
+  </ItemGroup>
+
 </Project>
