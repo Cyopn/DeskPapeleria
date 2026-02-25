@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window x:Class="DeskApp.ImageEditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Editor de Imagen" 
+        Height="600" 
+        Width="800" 
+        WindowStartupLocation="CenterOwner">
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Padding" 
+                    Value="8,4"/>
+            <Setter Property="FontSize" 
+                    Value="18"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" 
+                                              Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+	<Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Border Background="#222" 
+                    CornerRadius="8" 
+                    Padding="8" 
+                    ClipToBounds="True">
+                <Grid ClipToBounds="True">
+                    <Image x:Name="EditorImage" 
+                           Stretch="Uniform"/>
+                    <Canvas x:Name="OverlayCanvas" 
+                            Background="Transparent" 
+                            IsHitTestVisible="True" 
+                            ClipToBounds="True"
+						    Width="{Binding ActualWidth, ElementName=EditorImage}"
+						    Height="{Binding ActualHeight, ElementName=EditorImage}"
+						    HorizontalAlignment="Center" 
+                            VerticalAlignment="Center">
+                        <Rectangle x:Name="CropRect"
+                                   Stroke="#FF4080" 
+                                   StrokeThickness="2" 
+                                   Fill="#40FFFFFF" 
+                                   Width="100" 
+                                   Height="100" 
+                                   Visibility="Visible" 
+                                   Cursor="Hand" 
+                                   IsHitTestVisible="False" 
+                                   Canvas.Left="0" 
+                                   Canvas.Top="0" />
+                        <Line x:Name="GridLineV1" 
+                              Stroke="#80FFFFFF" 
+                              StrokeThickness="1" 
+                              Visibility="Visible" />
+                        <Line x:Name="GridLineV2" 
+                              Stroke="#80FFFFFF" 
+                              StrokeThickness="1" 
+                              Visibility="Visible" />
+                        <Line x:Name="GridLineH1" 
+                              Stroke="#80FFFFFF" 
+                              StrokeThickness="1"
+                              Visibility="Visible" />
+                        <Line x:Name="GridLineH2" 
+                              Stroke="#80FFFFFF" 
+                              StrokeThickness="1" 
+                              Visibility="Visible" />
+                        <Thumb x:Name="TopLeftThumb" 
+                               Width="12" Height="12" 
+                               Background="#FF4080" 
+                               Cursor="SizeNWSE" />
+                        <Thumb x:Name="TopRightThumb" 
+                               Width="12" 
+                               Height="12" 
+                               Background="#FF4080" 
+                               Cursor="SizeNESW" />
+                        <Thumb x:Name="BottomLeftThumb" 
+                               Width="12" 
+                               Height="12" 
+                               Background="#FF4080" 
+                               Cursor="SizeNESW" />
+                        <Thumb x:Name="BottomRightThumb" 
+                               Width="12" 
+                               Height="12" 
+                               Background="#FF4080" 
+                               Cursor="SizeNWSE" />
+                    </Canvas>
+                </Grid>
+            </Border>
+        </Grid>
+        <Grid Grid.Row="1" 
+              Margin="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" 
+                        Orientation="Horizontal" 
+                        VerticalAlignment="Center" 
+                        Margin="4">
+                <TextBlock Text="Rotación:" 
+                           VerticalAlignment="Center" 
+                           Foreground="White" 
+                           Margin="0,0,6,0"/>
+                <Slider x:Name="RotationSlider" 
+                        Minimum="-180" 
+                        Maximum="180" 
+                        Value="0" 
+                        Width="220" 
+                        TickFrequency="15" 
+                        IsSnapToTickEnabled="False" 
+                        ValueChanged="RotationSlider_ValueChanged"/>
+                <TextBlock x:Name="RotationValueText" 
+                           Text="0°" 
+                           VerticalAlignment="Center" 
+                           Foreground="White" 
+                           Margin="6,0,0,0"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" 
+                        Orientation="Horizontal" 
+                        HorizontalAlignment="Right" 
+                        VerticalAlignment="Center">
+				<Button Content="Recortar" 
+                        Click="CropButton_Click" 
+                        Margin="4" 
+                        Width="100" 
+                        Cursor="Hand"/>
+				<Button Content="Aceptar" 
+                        Click="OkButton_Click" 
+                        Margin="4" 
+                        Width="100" 
+                        Cursor="Hand"/>
+				<Button Content="Cancelar" 
+                        Click="CancelButton_Click" 
+                        Background="Black" 
+                        Foreground="White" 
+                        Margin="4" 
+                        Width="100" 
+                        Cursor="Hand"/>
+			</StackPanel>
+		</Grid>
+	</Grid>
+</Window>

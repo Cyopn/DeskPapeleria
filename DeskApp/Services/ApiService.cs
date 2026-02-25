@@ -21,7 +21,6 @@ namespace DeskApp.Services
             _config = AppConfiguration.Instance;
             _httpClient = new HttpClient();
             
-            // Configurar headers necesarios para ngrok
             _httpClient.DefaultRequestHeaders.Add("ngrok-skip-browser-warning", "true");
             _httpClient.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/json"));
@@ -69,7 +68,6 @@ namespace DeskApp.Services
 
                 if (response.IsSuccessStatusCode)
                 {
-                    // Respuesta exitosa (200-299)
                     try
                     {
                         var successResponse = JsonSerializer.Deserialize<UserRegistrationResponse>(
@@ -90,7 +88,6 @@ namespace DeskApp.Services
                 }
                 else
                 {
-                    // Error del servidor (400, 404, 500, etc.)
                     result.Success = false;
                     
                     try
@@ -107,7 +104,6 @@ namespace DeskApp.Services
                             result.ErrorMessage = errorResponse.Message;
                             result.ValidationErrors = errorResponse.Errors;
 
-                            // Si no hay errores específicos pero hay un campo "error"
                             if (errorResponse.Errors == null && !string.IsNullOrEmpty(errorResponse.Error))
                             {
                                 result.ValidationErrors = new System.Collections.Generic.List<string> { errorResponse.Error };
@@ -120,7 +116,6 @@ namespace DeskApp.Services
                     }
                     catch (JsonException)
                     {
-                        // Si no se puede deserializar como error estructurado, usar el contenido raw
                         result.ErrorMessage = !string.IsNullOrEmpty(responseContent) 
                             ? responseContent 
                             : $"Error HTTP {result.StatusCode}";
@@ -171,7 +166,6 @@ namespace DeskApp.Services
 
                 if (response.IsSuccessStatusCode)
                 {
-                    // Respuesta exitosa (200-299)
                     try
                     {
                         var successResponse = JsonSerializer.Deserialize<LoginResponse>(
@@ -192,7 +186,6 @@ namespace DeskApp.Services
                 }
                 else
                 {
-                    // Error del servidor (400, 401, 404, 500, etc.)
                     result.Success = false;
                     
                     try
@@ -343,7 +336,6 @@ namespace DeskApp.Services
             return result;
         }
 
-        // Método para probar la conexión con la API
         public async Task<bool> TestConnectionAsync()
         {
             try
@@ -356,6 +348,627 @@ namespace DeskApp.Services
             {
                 return false;
             }
+        }
+
+        public async Task<ApiResult<UserData>> UpdateUserAsync(int userId, UserUpdateRequest request, string bearerToken)
+        {
+            var result = new ApiResult<UserData>();
+
+            try
+            {
+                var baseUrl = _config.GetFullUrl(_config.UsersEndpoint);
+                var url = baseUrl.EndsWith("/") ? $"{baseUrl}{userId}" : $"{baseUrl}/{userId}";
+
+                if (string.IsNullOrWhiteSpace(bearerToken))
+                {
+                    result.Success = false;
+                    result.StatusCode = 401;
+                    result.ErrorMessage = "Token de autenticación no disponible";
+                    return result;
+                }
+
+                var jsonContent = JsonSerializer.Serialize(request, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+
+                using var message = new HttpRequestMessage(HttpMethod.Put, url)
+                {
+                    Content = new StringContent(jsonContent, Encoding.UTF8, "application/json")
+                };
+                message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+
+                var response = await _httpClient.SendAsync(message);
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                result.StatusCode = (int)response.StatusCode;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    try
+                    {
+                        var updatedUser = JsonSerializer.Deserialize<UserData>(
+                            responseContent,
+                            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                        result.Success = true;
+                        result.Data = updatedUser;
+                    }
+                    catch (JsonException)
+                    {
+                        result.Success = false;
+                        result.ErrorMessage = "Error al procesar la respuesta del servidor";
+                    }
+                }
+                else
+                {
+                    result.Success = false;
+                    try
+                    {
+                        var errorResponse = JsonSerializer.Deserialize<ApiErrorResponse>(
+                            responseContent,
+                            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                        if (errorResponse != null)
+                        {
+                            result.ErrorMessage = errorResponse.Message;
+                            result.ValidationErrors = errorResponse.Errors;
+                            if (errorResponse.Errors == null && !string.IsNullOrEmpty(errorResponse.Error))
+                            {
+                                result.ValidationErrors = new System.Collections.Generic.List<string> { errorResponse.Error };
+                            }
+                        }
+                        else
+                        {
+                            result.ErrorMessage = $"Error HTTP {result.StatusCode}";
+                        }
+                    }
+                    catch (JsonException)
+                    {
+                        result.ErrorMessage = !string.IsNullOrEmpty(responseContent)
+                            ? responseContent
+                            : $"Error HTTP {result.StatusCode}";
+                    }
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = "La solicitud ha excedido el tiempo de espera";
+            }
+            catch (HttpRequestException ex)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = $"Error de conexión: {ex.Message}";
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = $"Error inesperado: {ex.Message}";
+            }
+
+            return result;
+        }
+
+        public async Task<ApiResult<bool>> DeleteUserAsync(int userId, string bearerToken)
+        {
+            var result = new ApiResult<bool>();
+
+            try
+            {
+                var baseUrl = _config.GetFullUrl(_config.UsersEndpoint);
+                var url = baseUrl.EndsWith("/") ? $"{baseUrl}{userId}" : $"{baseUrl}/{userId}";
+
+                if (string.IsNullOrWhiteSpace(bearerToken))
+                {
+                    result.Success = false;
+                    result.StatusCode = 401;
+                    result.ErrorMessage = "Token de autenticación no disponible";
+                    return result;
+                }
+
+                using var message = new HttpRequestMessage(HttpMethod.Delete, url);
+                message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+
+                var response = await _httpClient.SendAsync(message);
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                result.StatusCode = (int)response.StatusCode;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    result.Success = true;
+                    result.Data = true;
+                }
+                else
+                {
+                    result.Success = false;
+                    try
+                    {
+                        var errorResponse = JsonSerializer.Deserialize<ApiErrorResponse>(
+                            responseContent,
+                            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                        if (errorResponse != null)
+                        {
+                            result.ErrorMessage = errorResponse.Message;
+                            result.ValidationErrors = errorResponse.Errors;
+                            if (errorResponse.Errors == null && !string.IsNullOrEmpty(errorResponse.Error))
+                            {
+                                result.ValidationErrors = new System.Collections.Generic.List<string> { errorResponse.Error };
+                            }
+                        }
+                        else
+                        {
+                            result.ErrorMessage = $"Error HTTP {result.StatusCode}";
+                        }
+                    }
+                    catch (JsonException)
+                    {
+                        result.ErrorMessage = !string.IsNullOrEmpty(responseContent)
+                            ? responseContent
+                            : $"Error HTTP {result.StatusCode}";
+                    }
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = "La solicitud ha excedido el tiempo de espera";
+            }
+            catch (HttpRequestException ex)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = $"Error de conexión: {ex.Message}";
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = $"Error inesperado: {ex.Message}";
+            }
+
+            return result;
+        }
+
+        public async Task<ApiResult<List<ProductData>>> GetProductsByTypeAsync(string type, string bearerToken)
+        {
+            var result = new ApiResult<List<ProductData>>();
+
+            try
+            {
+                var baseUrl = _config.GetFullUrl(_config.UsersEndpoint);
+                var url = _config.GetFullUrl($"/products/type/{type}");
+
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+
+                if (string.IsNullOrWhiteSpace(bearerToken))
+                {
+                    result.Success = false;
+                    result.StatusCode = 401;
+                    result.ErrorMessage = "Token de autenticación no disponible";
+                    return result;
+                }
+
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+
+                var response = await _httpClient.SendAsync(request);
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                try { Console.WriteLine($"[ApiService] GET {url} - Response: {responseContent}"); } catch {  }
+
+                result.StatusCode = (int)response.StatusCode;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    try
+                    {
+                        using var doc = JsonDocument.Parse(responseContent);
+                        if (doc.RootElement.TryGetProperty("products", out var productsElement) && productsElement.ValueKind == JsonValueKind.Array)
+                        {
+                            var products = JsonSerializer.Deserialize<List<ProductData>>(productsElement.GetRawText(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                            result.Success = true;
+                            result.Data = products ?? new List<ProductData>();
+                        }
+                        else if (doc.RootElement.ValueKind == JsonValueKind.Array)
+                        {
+                            var products = JsonSerializer.Deserialize<List<ProductData>>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                            result.Success = true;
+                            result.Data = products ?? new List<ProductData>();
+                        }
+                        else
+                        {
+                            result.Success = false;
+                            result.ErrorMessage = "Respuesta de productos no contiene la propiedad 'products'";
+                        }
+                    }
+                    catch (JsonException)
+                    {
+                        result.Success = false;
+                        result.ErrorMessage = "Error al procesar la respuesta del servidor";
+                    }
+                }
+                else
+                {
+                    result.Success = false;
+                    try
+                    {
+                        var errorResponse = JsonSerializer.Deserialize<ApiErrorResponse>(
+                            responseContent,
+                            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                        if (errorResponse != null)
+                        {
+                            result.ErrorMessage = errorResponse.Message;
+                            result.ValidationErrors = errorResponse.Errors;
+                            if (errorResponse.Errors == null && !string.IsNullOrEmpty(errorResponse.Error))
+                            {
+                                result.ValidationErrors = new System.Collections.Generic.List<string> { errorResponse.Error };
+                            }
+                        }
+                        else
+                        {
+                            result.ErrorMessage = $"Error HTTP {result.StatusCode}";
+                        }
+                    }
+                    catch (JsonException)
+                    {
+                        result.ErrorMessage = !string.IsNullOrEmpty(responseContent)
+                            ? responseContent
+                            : $"Error HTTP {result.StatusCode}";
+                    }
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = "La solicitud ha excedido el tiempo de espera";
+            }
+            catch (HttpRequestException ex)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = $"Error de conexión: {ex.Message}";
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = $"Error inesperado: {ex.Message}";
+            }
+
+            return result;
+        }
+
+        public async Task<ApiResult<ProductData>> UpdateProductAsync(int productId, ProductUpdateRequest request, string bearerToken)
+        {
+            var result = new ApiResult<ProductData>();
+
+            try
+            {
+                var baseUrl = _config.GetFullUrl("/products");
+                var url = baseUrl.EndsWith("/") ? $"{baseUrl}{productId}" : $"{baseUrl}/{productId}";
+
+                if (string.IsNullOrWhiteSpace(bearerToken))
+                {
+                    result.Success = false;
+                    result.StatusCode = 401;
+                    result.ErrorMessage = "Token de autenticación no disponible";
+                    return result;
+                }
+
+                var jsonContent = JsonSerializer.Serialize(request, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = null,
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                });
+
+                try { Console.WriteLine($"[ApiService] PUT {url} - Request JSON: {jsonContent}"); } catch { }
+
+                using var message = new HttpRequestMessage(HttpMethod.Put, url)
+                {
+                    Content = new StringContent(jsonContent, Encoding.UTF8, "application/json")
+                };
+                message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+                
+                try
+                {
+                    Console.WriteLine($"[ApiService] PUT {url} - Authorization present: {message.Headers.Authorization != null}");
+                    Console.WriteLine($"[ApiService] PUT {url} - Content-Type: {message.Content.Headers.ContentType}");
+                    Console.WriteLine($"[ApiService] PUT {url} - Content Length: {message.Content.Headers.ContentLength}");
+                    System.Diagnostics.Debug.WriteLine($"[ApiService] PUT {url} - Full request:\nHeaders: {string.Join("; ", message.Headers)}\nContent: {jsonContent}");
+                }
+                catch { }
+
+                var response = await _httpClient.SendAsync(message);
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                try { Console.WriteLine($"[ApiService] PUT {url} - Status: {(int)response.StatusCode} - Response: {responseContent}"); } catch { }
+
+                result.StatusCode = (int)response.StatusCode;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    try
+                    {
+                        using var doc = JsonDocument.Parse(responseContent);
+                        if (doc.RootElement.TryGetProperty("product", out var productElement))
+                        {
+                            var product = JsonSerializer.Deserialize<ProductData>(productElement.GetRawText(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                            result.Success = true;
+                            result.Data = product;
+                        }
+                        else if (doc.RootElement.ValueKind == JsonValueKind.Object)
+                        {
+                            var product = JsonSerializer.Deserialize<ProductData>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                            result.Success = true;
+                            result.Data = product;
+                        }
+                        else
+                        {
+                            result.Success = false;
+                            result.ErrorMessage = "Respuesta inesperada del servidor al actualizar producto";
+                        }
+                    }
+                    catch (JsonException)
+                    {
+                        result.Success = false;
+                        result.ErrorMessage = "Error al procesar la respuesta del servidor";
+                    }
+                }
+                else
+                {
+                    result.Success = false;
+                    try
+                    {
+                        var errorResponse = JsonSerializer.Deserialize<ApiErrorResponse>(
+                            responseContent,
+                            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                        if (errorResponse != null)
+                        {
+                            result.ErrorMessage = errorResponse.Message;
+                            result.ValidationErrors = errorResponse.Errors;
+                            if (errorResponse.Errors == null && !string.IsNullOrEmpty(errorResponse.Error))
+                            {
+                                result.ValidationErrors = new System.Collections.Generic.List<string> { errorResponse.Error };
+                            }
+                        }
+                        else
+                        {
+                            result.ErrorMessage = $"Error HTTP {result.StatusCode}";
+                        }
+                    }
+                    catch (JsonException)
+                    {
+                        result.ErrorMessage = !string.IsNullOrEmpty(responseContent)
+                            ? responseContent
+                            : $"Error HTTP {result.StatusCode}";
+                    }
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = "La solicitud ha excedido el tiempo de espera";
+            }
+            catch (HttpRequestException ex)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = $"Error de conexión: {ex.Message}";
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = $"Error inesperado: {ex.Message}";
+            }
+
+            return result;
+        }
+
+        public async Task<ApiResult<bool>> DeleteProductAsync(int productId, string bearerToken)
+        {
+            var result = new ApiResult<bool>();
+
+            try
+            {
+                var baseUrl = _config.GetFullUrl("/products");
+                var url = baseUrl.EndsWith("/") ? $"{baseUrl}{productId}" : $"{baseUrl}/{productId}";
+
+                if (string.IsNullOrWhiteSpace(bearerToken))
+                {
+                    result.Success = false;
+                    result.StatusCode = 401;
+                    result.ErrorMessage = "Token de autenticación no disponible";
+                    return result;
+                }
+
+                using var message = new HttpRequestMessage(HttpMethod.Delete, url);
+                message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+
+                var response = await _httpClient.SendAsync(message);
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                result.StatusCode = (int)response.StatusCode;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    result.Success = true;
+                    result.Data = true;
+                }
+                else
+                {
+                    result.Success = false;
+                    try
+                    {
+                        var errorResponse = JsonSerializer.Deserialize<ApiErrorResponse>(
+                            responseContent,
+                            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                        if (errorResponse != null)
+                        {
+                            result.ErrorMessage = errorResponse.Message;
+                            result.ValidationErrors = errorResponse.Errors;
+                            if (errorResponse.Errors == null && !string.IsNullOrEmpty(errorResponse.Error))
+                            {
+                                result.ValidationErrors = new System.Collections.Generic.List<string> { errorResponse.Error };
+                            }
+                        }
+                        else
+                        {
+                            result.ErrorMessage = $"Error HTTP {result.StatusCode}";
+                        }
+                    }
+                    catch (JsonException)
+                    {
+                        result.ErrorMessage = !string.IsNullOrEmpty(responseContent)
+                            ? responseContent
+                            : $"Error HTTP {result.StatusCode}";
+                    }
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = "La solicitud ha excedido el tiempo de espera";
+            }
+            catch (HttpRequestException ex)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = $"Error de conexión: {ex.Message}";
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = $"Error inesperado: {ex.Message}";
+            }
+
+            return result;
+        }
+
+        public async Task<ApiResult<ProductData>> CreateProductAsync(ProductCreateRequest request, string bearerToken)
+        {
+            var result = new ApiResult<ProductData>();
+
+            try
+            {
+                var url = _config.GetFullUrl("/products");
+
+                if (string.IsNullOrWhiteSpace(bearerToken))
+                {
+                    result.Success = false;
+                    result.StatusCode = 401;
+                    result.ErrorMessage = "Token de autenticación no disponible";
+                    return result;
+                }
+
+                var jsonContent = JsonSerializer.Serialize(request, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+
+                try { Console.WriteLine($"[ApiService] POST {url} - Request: {jsonContent}"); } catch { }
+
+                using var message = new HttpRequestMessage(HttpMethod.Post, url)
+                {
+                    Content = new StringContent(jsonContent, Encoding.UTF8, "application/json")
+                };
+                message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+
+                var response = await _httpClient.SendAsync(message);
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                try { Console.WriteLine($"[ApiService] POST {url} - Status: {(int)response.StatusCode} - Response: {responseContent}"); } catch { }
+
+                result.StatusCode = (int)response.StatusCode;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    try
+                    {
+                        using var doc = JsonDocument.Parse(responseContent);
+                        if (doc.RootElement.TryGetProperty("product", out var productElement))
+                        {
+                            var product = JsonSerializer.Deserialize<ProductData>(productElement.GetRawText(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                            result.Success = true;
+                            result.Data = product;
+                        }
+                        else if (doc.RootElement.ValueKind == JsonValueKind.Object)
+                        {
+                            var product = JsonSerializer.Deserialize<ProductData>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                            result.Success = true;
+                            result.Data = product;
+                        }
+                        else
+                        {
+                            result.Success = false;
+                            result.ErrorMessage = "Respuesta inesperada del servidor al crear producto";
+                        }
+                    }
+                    catch (JsonException)
+                    {
+                        result.Success = false;
+                        result.ErrorMessage = "Error al procesar la respuesta del servidor";
+                    }
+                }
+                else
+                {
+                    result.Success = false;
+                    try
+                    {
+                        var errorResponse = JsonSerializer.Deserialize<ApiErrorResponse>(
+                            responseContent,
+                            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                        if (errorResponse != null)
+                        {
+                            result.ErrorMessage = errorResponse.Message;
+                            result.ValidationErrors = errorResponse.Errors;
+                        }
+                        else
+                        {
+                            result.ErrorMessage = $"Error HTTP {result.StatusCode}";
+                        }
+                    }
+                    catch (JsonException)
+                    {
+                        result.ErrorMessage = !string.IsNullOrEmpty(responseContent)
+                            ? responseContent
+                            : $"Error HTTP {result.StatusCode}";
+                    }
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = "La solicitud ha excedido el tiempo de espera";
+            }
+            catch (HttpRequestException ex)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = $"Error de conexión: {ex.Message}";
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = $"Error inesperado: {ex.Message}";
+            }
+
+            return result;
         }
     }
 }

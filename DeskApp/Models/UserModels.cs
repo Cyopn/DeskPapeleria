@@ -84,6 +84,12 @@ namespace DeskApp.Models
         [JsonPropertyName("phone")]
         public string Phone { get; set; } = string.Empty;
 
+        [JsonPropertyName("file")]
+        public System.Collections.Generic.List<FileData>? Files { get; set; }
+
+        [JsonPropertyName("transactions")]
+        public System.Collections.Generic.List<TransactionData>? Transactions { get; set; }
+
         [JsonPropertyName("createdAt")]
         public DateTime CreatedAt { get; set; }
 
@@ -113,5 +119,26 @@ namespace DeskApp.Models
         public T? Data { get; set; }
         public string? ErrorMessage { get; set; }
         public List<string>? ValidationErrors { get; set; }
+    }
+
+    public class UserUpdateRequest
+    {
+        [JsonPropertyName("username")]
+        public string Username { get; set; } = string.Empty;
+
+        [JsonPropertyName("names")]
+        public string Names { get; set; } = string.Empty;
+
+        [JsonPropertyName("lastnames")]
+        public string Lastnames { get; set; } = string.Empty;
+
+        [JsonPropertyName("email")]
+        public string Email { get; set; } = string.Empty;
+
+        [JsonPropertyName("role")]
+        public string Role { get; set; } = string.Empty;
+
+        [JsonPropertyName("phone")]
+        public string Phone { get; set; } = string.Empty;
     }
 }

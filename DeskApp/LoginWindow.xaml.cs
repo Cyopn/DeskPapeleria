@@ -17,7 +17,7 @@ using DeskApp.Services;
 namespace DeskApp
 {
     /// <summary>
-    /// Lógica de interacción para Window1.xaml
+    /// Lógica de interacción para LoginWindow.xaml
     /// </summary>
     public partial class LoginWindow : Window
     {
@@ -40,15 +40,10 @@ namespace DeskApp
         {
             if (_sessionService.IsAuthenticated)
             {
-                EmployeeWindow employeeWindow = new EmployeeWindow();
-                employeeWindow.Show();
+                IndexWindow indexWindow = new IndexWindow();
+                indexWindow.Show();
                 this.Close();
             }
-        }
-
-        private void UsernameTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            // El hint se maneja automáticamente mediante el DataTrigger en XAML
         }
 
         private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
@@ -56,8 +51,6 @@ namespace DeskApp
             PasswordHint.Visibility = string.IsNullOrEmpty(PasswordBox.Password) 
                 ? Visibility.Visible 
                 : Visibility.Collapsed;
-
-            // Sincronizar con TextBox cuando está oculto
             if (!_isPasswordVisible)
             {
                 PasswordTextBox.Text = PasswordBox.Password;
@@ -69,8 +62,6 @@ namespace DeskApp
             PasswordHint.Visibility = string.IsNullOrEmpty(PasswordTextBox.Text) 
                 ? Visibility.Visible 
                 : Visibility.Collapsed;
-
-            // Sincronizar con PasswordBox cuando está visible
             if (_isPasswordVisible)
             {
                 PasswordBox.Password = PasswordTextBox.Text;
@@ -83,21 +74,19 @@ namespace DeskApp
 
             if (_isPasswordVisible)
             {
-                // Mostrar contraseña como texto
                 PasswordTextBox.Text = PasswordBox.Password;
                 PasswordBox.Visibility = Visibility.Collapsed;
                 PasswordTextBox.Visibility = Visibility.Visible;
-                TogglePasswordIcon.Text = "🙈"; // Cambiar icono a "ocultar"
+                TogglePasswordIcon.Text = "🙈";
                 PasswordTextBox.Focus();
                 PasswordTextBox.CaretIndex = PasswordTextBox.Text.Length;
             }
             else
             {
-                // Ocultar contraseña
                 PasswordBox.Password = PasswordTextBox.Text;
                 PasswordTextBox.Visibility = Visibility.Collapsed;
                 PasswordBox.Visibility = Visibility.Visible;
-                TogglePasswordIcon.Text = "👁"; // Cambiar icono a "ver"
+                TogglePasswordIcon.Text = "👁";
                 PasswordBox.Focus();
             }
         }
@@ -138,25 +127,19 @@ namespace DeskApp
 
                 if (result.Success && result.Data != null)
                 {
-                    // Login exitoso
                     _sessionService.SetSession(result.Data.Token, result.Data.User!);
 
                     ToastNotification.Show(
-                        $"¡Bienvenido {result.Data.User?.Names}!", 
+                        $"¡Bienvenido {result.Data.User?.Username}!", 
                         ToastType.Success, 
                         2);
-
-                    // Esperar un momento para que el usuario vea el mensaje
                     await Task.Delay(1500);
-
-                    // Navegar a la ventana principal
-                    EmployeeWindow employeeWindow = new EmployeeWindow();
-                    employeeWindow.Show();
+                    IndexWindow indexWindow = new IndexWindow();
+                    indexWindow.Show();
                     this.Close();
                 }
                 else
                 {
-                    // Manejar errores
                     HandleLoginError(result);
                 }
             }
@@ -182,7 +165,7 @@ namespace DeskApp
         {
             switch (result.StatusCode)
             {
-                case 400: // Bad Request - Datos inválidos
+                case 400:
                     if (result.ValidationErrors != null && result.ValidationErrors.Count > 0)
                     {
                         var mainError = result.ErrorMessage ?? "Datos inválidos";
@@ -202,7 +185,7 @@ namespace DeskApp
                     }
                     break;
 
-                case 401: // Unauthorized - Credenciales incorrectas
+                case 401:
                     ToastNotification.Show(
                         result.ErrorMessage ?? "Usuario o contraseña incorrectos", 
                         ToastType.Error, 
@@ -219,7 +202,7 @@ namespace DeskApp
                     }
                     break;
 
-                case 404: // Not Found - Usuario no existe
+                case 404:
                     ToastNotification.Show(
                         result.ErrorMessage ?? "Usuario no encontrado", 
                         ToastType.Error, 
@@ -227,14 +210,14 @@ namespace DeskApp
                     UsernameTextBox.Focus();
                     break;
 
-                case 500: // Internal Server Error
+                case 500:
                     ToastNotification.Show(
                         result.ErrorMessage ?? "Error interno del servidor. Inténtalo más tarde.", 
                         ToastType.Error, 
                         5);
                     break;
 
-                case 0: // Error de conexión/timeout
+                case 0:
                     if (result.ErrorMessage != null && result.ErrorMessage.Contains("tiempo"))
                     {
                         ToastNotification.Show(

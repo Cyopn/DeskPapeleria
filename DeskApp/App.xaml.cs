@@ -1,6 +1,8 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
 using System.Data;
 using System.Windows;
+using DeskApp.Services;
 
 namespace DeskApp
 {
@@ -9,6 +11,18 @@ namespace DeskApp
     /// </summary>
     public partial class App : Application
     {
+        protected override void OnExit(ExitEventArgs e)
+        {
+            try
+            {
+                SessionService.Instance.ClearSession();
+            }
+            catch
+            {
+            }
+
+            base.OnExit(e);
+        }
     }
 
 }

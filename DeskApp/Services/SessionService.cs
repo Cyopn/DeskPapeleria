@@ -22,6 +22,8 @@ namespace DeskApp.Services
         public string? Token { get; private set; }
         public UserData? CurrentUser { get; private set; }
 
+        public string? AuthToken => Token;
+
         private SessionService()
         {
             IsAuthenticated = false;
@@ -91,7 +93,6 @@ namespace DeskApp.Services
             }
             catch (Exception ex)
             {
-                // En caso de error al guardar, continuar sin persistencia
                 System.Diagnostics.Debug.WriteLine($"Error guardando sesión: {ex.Message}");
             }
         }
@@ -116,7 +117,6 @@ namespace DeskApp.Services
             }
             catch (Exception ex)
             {
-                // Si hay error al cargar, continuar sin sesión
                 System.Diagnostics.Debug.WriteLine($"Error cargando sesión: {ex.Message}");
                 DeleteSessionFile();
             }
@@ -139,7 +139,6 @@ namespace DeskApp.Services
 
         private string EncryptString(string plainText)
         {
-            // Usar ProtectedData para encriptar (solo Windows)
             try
             {
                 var plainBytes = Encoding.UTF8.GetBytes(plainText);
@@ -152,7 +151,6 @@ namespace DeskApp.Services
             }
             catch
             {
-                // Si falla, usar Base64 simple (menos seguro pero funcional)
                 return Convert.ToBase64String(Encoding.UTF8.GetBytes(plainText));
             }
         }
@@ -171,7 +169,6 @@ namespace DeskApp.Services
             }
             catch
             {
-                // Si falla, intentar decodificar Base64 simple
                 return Encoding.UTF8.GetString(Convert.FromBase64String(encryptedText));
             }
         }

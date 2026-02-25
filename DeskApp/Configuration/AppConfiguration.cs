@@ -13,12 +13,10 @@ namespace DeskApp.Configuration
 
         private AppConfiguration()
         {
-            // Valores por defecto desde appsettings.json
             ApiBaseUrl = "https://noninitial-chirurgical-judah.ngrok-free.dev/api";
             UsersEndpoint = "/users/";
             LoginEndpoint = "/users/login";
 
-            // También puedes leer desde variables de entorno si están configuradas
             var envApiUrl = Environment.GetEnvironmentVariable("DESK_API_URL");
             if (!string.IsNullOrEmpty(envApiUrl))
             {

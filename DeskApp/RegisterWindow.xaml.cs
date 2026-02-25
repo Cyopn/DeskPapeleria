@@ -21,7 +21,7 @@ namespace DeskApp
     /// <summary>
     /// Lógica de interacción para RegisterWindow.xaml
     /// </summary>
-    public partial class RegisterWindow : Window
+    public partial class RegisterWindow
     {
         private readonly ApiService _apiService;
         private bool _isRegistering = false;
@@ -40,8 +40,6 @@ namespace DeskApp
             PasswordHint.Visibility = string.IsNullOrEmpty(PasswordBox.Password)
                 ? Visibility.Visible
                 : Visibility.Collapsed;
-
-            // Sincronizar con TextBox cuando está oculto
             if (!_isPasswordVisible)
             {
                 PasswordTextBox.Text = PasswordBox.Password;
@@ -53,8 +51,6 @@ namespace DeskApp
             PasswordHint.Visibility = string.IsNullOrEmpty(PasswordTextBox.Text)
                 ? Visibility.Visible
                 : Visibility.Collapsed;
-
-            // Sincronizar con PasswordBox cuando está visible
             if (_isPasswordVisible)
             {
                 PasswordBox.Password = PasswordTextBox.Text;
@@ -67,7 +63,6 @@ namespace DeskApp
 
             if (_isPasswordVisible)
             {
-                // Mostrar contraseña como texto
                 PasswordTextBox.Text = PasswordBox.Password;
                 PasswordBox.Visibility = Visibility.Collapsed;
                 PasswordTextBox.Visibility = Visibility.Visible;
@@ -77,7 +72,6 @@ namespace DeskApp
             }
             else
             {
-                // Ocultar contraseña
                 PasswordBox.Password = PasswordTextBox.Text;
                 PasswordTextBox.Visibility = Visibility.Collapsed;
                 PasswordBox.Visibility = Visibility.Visible;
@@ -91,8 +85,6 @@ namespace DeskApp
             PasswordConfirmHint.Visibility = string.IsNullOrEmpty(PasswordConfirmBox.Password)
                 ? Visibility.Visible
                 : Visibility.Collapsed;
-
-            // Sincronizar con TextBox cuando está oculto
             if (!_isPasswordConfirmVisible)
             {
                 PasswordConfirmTextBox.Text = PasswordConfirmBox.Password;
@@ -104,8 +96,6 @@ namespace DeskApp
             PasswordConfirmHint.Visibility = string.IsNullOrEmpty(PasswordConfirmTextBox.Text)
                 ? Visibility.Visible
                 : Visibility.Collapsed;
-
-            // Sincronizar con PasswordBox cuando está visible
             if (_isPasswordConfirmVisible)
             {
                 PasswordConfirmBox.Password = PasswordConfirmTextBox.Text;
@@ -118,7 +108,6 @@ namespace DeskApp
 
             if (_isPasswordConfirmVisible)
             {
-                // Mostrar contraseña como texto
                 PasswordConfirmTextBox.Text = PasswordConfirmBox.Password;
                 PasswordConfirmBox.Visibility = Visibility.Collapsed;
                 PasswordConfirmTextBox.Visibility = Visibility.Visible;
@@ -128,7 +117,6 @@ namespace DeskApp
             }
             else
             {
-                // Ocultar contraseña
                 PasswordConfirmBox.Password = PasswordConfirmTextBox.Text;
                 PasswordConfirmTextBox.Visibility = Visibility.Collapsed;
                 PasswordConfirmBox.Visibility = Visibility.Visible;
@@ -159,8 +147,6 @@ namespace DeskApp
 
             try
             {
-                ToastNotification.Show("Registrando usuario...", ToastType.Info, 2);
-
                 var password = _isPasswordVisible ? PasswordTextBox.Text : PasswordBox.Password;
                 var passwordConfirm = _isPasswordConfirmVisible ? PasswordConfirmTextBox.Text : PasswordConfirmBox.Password;
 
@@ -180,23 +166,16 @@ namespace DeskApp
 
                 if (result.Success && result.Data != null)
                 {
-                    // Registro exitoso (código 200-299)
-                    ToastNotification.Show(
-                        result.Data.Message ?? "¡Registro exitoso!", 
+                    ToastNotification.Show("¡Registro exitoso!", 
                         ToastType.Success, 
                         3);
-
-                    // Esperar un momento para que el usuario vea el mensaje
                     await Task.Delay(2000);
-
-                    // Navegar a la ventana de login
                     LoginWindow loginWindow = new LoginWindow();
                     loginWindow.Show();
                     this.Close();
                 }
                 else
                 {
-                    // Manejar errores según el código de estado
                     HandleRegistrationError(result);
                 }
             }
@@ -222,10 +201,9 @@ namespace DeskApp
         {
             switch (result.StatusCode)
             {
-                case 400: // Bad Request - Errores de validación
+                case 400:
                     if (result.ValidationErrors != null && result.ValidationErrors.Count > 0)
                     {
-                        // Mostrar el primer error de validación con más detalle
                         var mainError = result.ErrorMessage ?? "Datos inválidos";
                         var detailedErrors = string.Join("\n• ", result.ValidationErrors);
                         
@@ -243,21 +221,21 @@ namespace DeskApp
                     }
                     break;
 
-                case 409: // Conflict - Usuario o email duplicado
+                case 409:
                     ToastNotification.Show(
                         result.ErrorMessage ?? "El usuario o email ya están registrados", 
                         ToastType.Error, 
                         4);
                     break;
 
-                case 500: // Internal Server Error
+                case 500:
                     ToastNotification.Show(
                         result.ErrorMessage ?? "Error interno del servidor. Inténtalo más tarde.", 
                         ToastType.Error, 
                         5);
                     break;
 
-                case 0: // Error de conexión/timeout
+                case 0:
                     if (result.ErrorMessage != null && result.ErrorMessage.Contains("tiempo"))
                     {
                         ToastNotification.Show(
@@ -275,7 +253,6 @@ namespace DeskApp
                     break;
 
                 default:
-                    // Otros códigos de error
                     ToastNotification.Show(
                         result.ErrorMessage ?? $"Error HTTP {result.StatusCode}. Inténtalo de nuevo.", 
                         ToastType.Error, 
@@ -299,8 +276,6 @@ namespace DeskApp
                 UsernameTextBox.Focus();
                 return false;
             }
-
-            // Validar que el username solo contenga letras, números y guiones bajos
             if (!IsValidUsername(UsernameTextBox.Text))
             {
                 ToastNotification.Show("El nombre de usuario solo puede contener letras, números y guiones bajos", ToastType.Warning);
@@ -429,7 +404,6 @@ namespace DeskApp
         {
             try
             {
-                // Solo permite letras, números y guiones bajos
                 var regex = new Regex(@"^[a-zA-Z0-9_]+$");
                 return regex.IsMatch(username);
             }
@@ -456,10 +430,7 @@ namespace DeskApp
         {
             try
             {
-                // Remover espacios, guiones y paréntesis
                 var cleanPhone = phone.Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "");
-                
-                // Verificar que tenga al menos 9 dígitos (considerando +34 o similares)
                 var digitsOnly = new string(cleanPhone.Where(char.IsDigit).ToArray());
                 return digitsOnly.Length >= 9;
             }

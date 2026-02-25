@@ -18,16 +18,47 @@ namespace DeskApp
     public class ToastNotification
     {
         private static Grid? _notificationContainer;
+        private static StackPanel? _stackPanel;
         private static readonly object _lock = new object();
 
         public static void Initialize(Grid container)
         {
             _notificationContainer = container;
+
+            try
+            {
+                foreach (UIElement child in _notificationContainer.Children)
+                {
+                    if (child is StackPanel sp && sp.Tag as string == "_toast_stack")
+                    {
+                        _stackPanel = sp;
+                        break;
+                    }
+                }
+
+                if (_stackPanel == null)
+                {
+                    _stackPanel = new StackPanel
+                    {
+                        Orientation = Orientation.Vertical,
+                        HorizontalAlignment = HorizontalAlignment.Right,
+                        VerticalAlignment = VerticalAlignment.Top,
+                        Margin = new Thickness(0, 8, 8, 0),
+                        Tag = "_toast_stack"
+                    };
+                    _stackPanel.IsHitTestVisible = false;
+
+                    _notificationContainer.Children.Add(_stackPanel);
+                }
+            }
+            catch
+            {
+            }
         }
 
         public static void Show(string message, ToastType type = ToastType.Info, int durationSeconds = 3)
         {
-            if (_notificationContainer == null)
+            if (_notificationContainer == null || _stackPanel == null)
             {
                 throw new InvalidOperationException("ToastNotification no ha sido inicializado. Llama a Initialize() primero.");
             }
@@ -35,10 +66,10 @@ namespace DeskApp
             Application.Current.Dispatcher.Invoke(() =>
             {
                 var toast = CreateToast(message, type);
-                
+
                 lock (_lock)
                 {
-                    _notificationContainer.Children.Add(toast);
+                    _stackPanel.Children.Add(toast);
                 }
 
                 AnimateIn(toast);
@@ -52,10 +83,17 @@ namespace DeskApp
                     timer.Stop();
                     AnimateOut(toast, () =>
                     {
-                        lock (_lock)
+                        try
                         {
-                            _notificationContainer.Children.Remove(toast);
+                            lock (_lock)
+                            {
+                                if (_stackPanel != null && _stackPanel.Children.Contains(toast))
+                                {
+                                    _stackPanel.Children.Remove(toast);
+                                }
+                            }
                         }
+                        catch { }
                     });
                 };
                 timer.Start();
@@ -98,9 +136,8 @@ namespace DeskApp
             {
                 Background = new SolidColorBrush(backgroundColor),
                 CornerRadius = new CornerRadius(10),
-                Margin = new Thickness(10),
+                Margin = new Thickness(0, 6, 0, 0),
                 HorizontalAlignment = HorizontalAlignment.Right,
-                VerticalAlignment = VerticalAlignment.Top,
                 MaxWidth = 400,
                 Opacity = 0,
                 RenderTransform = new TranslateTransform(50, 0),
@@ -114,7 +151,7 @@ namespace DeskApp
                 Child = stackPanel
             };
 
-            Panel.SetZIndex(border, 1000);
+            border.IsHitTestVisible = false;
 
             return border;
         }
@@ -133,48 +170,65 @@ namespace DeskApp
 
         private static void AnimateIn(Border toast)
         {
-            var fadeIn = new DoubleAnimation
+            try
             {
-                From = 0,
-                To = 1,
-                Duration = TimeSpan.FromSeconds(0.3),
-                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
-            };
+                var fadeIn = new DoubleAnimation
+                {
+                    From = 0,
+                    To = 1,
+                    Duration = TimeSpan.FromSeconds(0.3),
+                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+                };
 
-            var slideIn = new DoubleAnimation
-            {
-                From = 50,
-                To = 0,
-                Duration = TimeSpan.FromSeconds(0.3),
-                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
-            };
+                var slideIn = new DoubleAnimation
+                {
+                    From = 50,
+                    To = 0,
+                    Duration = TimeSpan.FromSeconds(0.3),
+                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+                };
 
-            toast.BeginAnimation(UIElement.OpacityProperty, fadeIn);
-            toast.RenderTransform.BeginAnimation(TranslateTransform.XProperty, slideIn);
+                toast.BeginAnimation(UIElement.OpacityProperty, fadeIn);
+                if (toast.RenderTransform is TranslateTransform tt)
+                {
+                    tt.BeginAnimation(TranslateTransform.XProperty, slideIn);
+                }
+            }
+            catch { }
         }
 
         private static void AnimateOut(Border toast, Action onComplete)
         {
-            var fadeOut = new DoubleAnimation
+            try
             {
-                From = 1,
-                To = 0,
-                Duration = TimeSpan.FromSeconds(0.3),
-                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
-            };
+                var fadeOut = new DoubleAnimation
+                {
+                    From = 1,
+                    To = 0,
+                    Duration = TimeSpan.FromSeconds(0.3),
+                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
+                };
 
-            var slideOut = new DoubleAnimation
+                var slideOut = new DoubleAnimation
+                {
+                    From = 0,
+                    To = 50,
+                    Duration = TimeSpan.FromSeconds(0.3),
+                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
+                };
+
+                fadeOut.Completed += (s, e) => onComplete?.Invoke();
+
+                toast.BeginAnimation(UIElement.OpacityProperty, fadeOut);
+                if (toast.RenderTransform is TranslateTransform tt)
+                {
+                    tt.BeginAnimation(TranslateTransform.XProperty, slideOut);
+                }
+            }
+            catch
             {
-                From = 0,
-                To = 50,
-                Duration = TimeSpan.FromSeconds(0.3),
-                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
-            };
-
-            fadeOut.Completed += (s, e) => onComplete?.Invoke();
-
-            toast.BeginAnimation(UIElement.OpacityProperty, fadeOut);
-            toast.RenderTransform.BeginAnimation(TranslateTransform.XProperty, slideOut);
+                try { onComplete?.Invoke(); } catch { }
+            }
         }
     }
 }

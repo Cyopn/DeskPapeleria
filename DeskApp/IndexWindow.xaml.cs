@@ -18,17 +18,18 @@ using DeskApp.Services;
 namespace DeskApp
 {
     /// <summary>
-    /// Lógica de interacción para EmployeeWindow.xaml
+    /// Lógica de interacción para IndexWindow.xaml
     /// </summary>
-    public partial class EmployeeWindow : Window
+    public partial class IndexWindow : Window
     {
         private readonly SessionService _sessionService;
         private readonly ApiService _apiService;
         private Button? _activeTabButton;
 
         public ObservableCollection<UserData> Users { get; } = new();
+        public ObservableCollection<ProductData> Products { get; } = new();
 
-        public EmployeeWindow()
+        public IndexWindow()
         {
             InitializeComponent();
             ToastNotification.Initialize(NotificationContainer);
@@ -36,7 +37,6 @@ namespace DeskApp
             _apiService = ApiService.Instance;
             DataContext = this;
 
-            // Verificar autenticación
             if (!_sessionService.IsAuthenticated)
             {
                 LoginWindow loginWindow = new LoginWindow();
@@ -45,19 +45,18 @@ namespace DeskApp
                 return;
             }
 
-            // Establecer el primer tab como activo
             SetActiveTab(EmpleadosButton, Tab1Content);
 
-            // Mostrar mensaje de bienvenida
             if (_sessionService.CurrentUser != null)
             {
                 ToastNotification.Show(
-                    $"Bienvenido, {_sessionService.CurrentUser.Names}!", 
+                    $"Bienvenido, {_sessionService.CurrentUser.Username}!", 
                     ToastType.Success, 
                     3);
             }
 
             _ = LoadUsersAsync();
+            _ = LoadProductsAsync();
         }
 
         private async Task LoadUsersAsync()
@@ -68,7 +67,7 @@ namespace DeskApp
                 if (result.Success && result.Data != null)
                 {
                     Users.Clear();
-                    foreach (var user in result.Data.Where(u => u.Role == "employee" || u.Role == "admin"))
+                    foreach (var user in result.Data.Where(u => u.Role == "employee" || u.Role == "admin" || u.Role == "manager" || u.Role == "supervisor"))
                     {
                         Users.Add(user);
                     }
@@ -81,6 +80,31 @@ namespace DeskApp
             catch (Exception ex)
             {
                 ToastNotification.Show($"Error al cargar usuarios: {ex.Message}", ToastType.Error, 4);
+            }
+        }
+
+        private async Task LoadProductsAsync()
+        {
+            try
+            {
+                var token = _sessionService.Token ?? string.Empty;
+                var result = await _apiService.GetProductsByTypeAsync("item", token);
+                if (result.Success && result.Data != null)
+                {
+                    Products.Clear();
+                    foreach (var p in result.Data)
+                    {
+                        Products.Add(p);
+                    }
+                }
+                else
+                {
+                    ToastNotification.Show(result.ErrorMessage ?? "No se pudieron cargar los productos", ToastType.Error, 4);
+                }
+            }
+            catch (Exception ex)
+            {
+                ToastNotification.Show($"Error al cargar productos: {ex.Message}", ToastType.Error, 4);
             }
         }
 
@@ -105,22 +129,15 @@ namespace DeskApp
 
         private void SetActiveTab(Button activeButton, UIElement activeContent)
         {
-            // Ocultar todos los tabs
             Tab1Content.Visibility = Visibility.Collapsed;
             Tab2Content.Visibility = Visibility.Collapsed;
             Tab3Content.Visibility = Visibility.Collapsed;
-
-            // Resetear estilos a los básicos
             var baseStyle = (Style)FindResource("MenuButtonStyle");
             EmpleadosButton.Style = baseStyle;
             ProductosButton.Style = baseStyle;
             ImpresorasButton.Style = baseStyle;
-
-            // Asignar estilo activo
             var activeStyle = (Style)FindResource("ActiveMenuButtonStyle");
             activeButton.Style = activeStyle;
-
-            // Mostrar contenido seleccionado
             activeContent.Visibility = Visibility.Visible;
             _activeTabButton = activeButton;
         }
@@ -137,8 +154,6 @@ namespace DeskApp
             {
                 _sessionService.ClearSession();
                 ToastNotification.Show("Sesión cerrada correctamente", ToastType.Success, 2);
-                
-                // Esperar un momento para que se vea el toast
                 Task.Delay(1000).ContinueWith(_ =>
                 {
                     Dispatcher.Invoke(() =>
@@ -151,12 +166,48 @@ namespace DeskApp
             }
         }
 
-        private void EditUser_Click(object sender, RoutedEventArgs e)
+        private async void EditUser_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.Tag is UserData user)
             {
-                ToastNotification.Show($"Editar usuario: {user.Names} {user.Lastnames}", ToastType.Info, 2);
+                var editWindow = new EditUserWindow(user)
+                {
+                    Owner = this
+                };
+
+                var result = editWindow.ShowDialog();
+                if (result == true)
+                {
+                    await LoadUsersAsync();
+                }
             }
+        }
+
+        private async void EditProduct_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is ProductData product)
+            {
+                var editWindow = new EditProductWindow(product)
+                {
+                    Owner = this
+                };
+
+                var result = editWindow.ShowDialog();
+                if (result == true)
+                {
+                    await LoadProductsAsync();
+                }
+            }
+        }
+
+        private void AddProductButton_Click(object sender, RoutedEventArgs e)
+        {
+            var win = new CreateProductWindow()
+            {
+                Owner = this
+            };
+            win.ShowDialog();
+            _ = LoadProductsAsync();
         }
     }
 }

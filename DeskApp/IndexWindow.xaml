@@ -1,0 +1,732 @@
+﻿<Window x:Class="DeskApp.IndexWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DeskApp"
+        mc:Ignorable="d"
+        Title="IndexWindow"
+        Height="700" 
+        Width="1050"
+        MinHeight="700" 
+        MinWidth="1050"
+        WindowState="Maximized">
+    <Window.Resources>
+        <Style x:Key="MenuButtonStyle" 
+               TargetType="Button">
+            <Setter Property="Background" 
+                    Value="Transparent"/>
+            <Setter Property="Foreground" 
+                    Value="Black"/>
+            <Setter Property="BorderThickness" 
+                    Value="0"/>
+            <Setter Property="Padding" 
+                    Value="15,10"/>
+            <Setter Property="Margin" 
+                    Value="5"/>
+            <Setter Property="FontSize" 
+                    Value="16"/>
+            <Setter Property="FontWeight" 
+                    Value="Medium"/>
+            <Setter Property="Cursor" 
+                    Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="25">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" 
+                         Value="True">
+                    <Setter Property="Background" 
+                            Value="#33FFFFFF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="ActiveMenuButtonStyle" 
+               TargetType="Button" 
+               BasedOn="{StaticResource MenuButtonStyle}">
+            <Setter Property="Background" 
+                    Value="White"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" 
+                         Value="True">
+                    <Setter Property="Background" 
+                            Value="White"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <local:RoleDisplayConverter x:Key="RoleDisplayConverter" />
+        <local:RoleToBrushConverter x:Key="RoleToBrushConverter" />
+        <Style x:Key="DataGridCellTextStyle" 
+               TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" 
+                    Value="Center"/>
+            <Setter Property="TextAlignment" 
+                    Value="Center"/>
+            <Setter Property="VerticalAlignment" 
+                    Value="Center"/>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Padding" 
+                    Value="8,4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="1*"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Grid>
+                    <Image Stretch="UniformToFill" 
+                           VerticalAlignment="Stretch" 
+                           HorizontalAlignment="Stretch">
+                        <Image.Source>
+                            <BitmapImage UriSource="pack://application:,,,/Resources/bg-employee.png"/>
+                        </Image.Source>
+                    </Image>
+                    <Rectangle Fill="Black" 
+                               Opacity="0.6"/>
+                </Grid>
+            </Grid>
+            <Grid Grid.Row="1" 
+                  Background="White">
+            </Grid>
+        </Grid>
+        <Grid Margin="30">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" 
+                       Text="Centro de Administración" 
+                       FontSize="36" 
+                       FontWeight="Bold" 
+                       HorizontalAlignment="Center" 
+                       VerticalAlignment="Center"
+                       Foreground="White"
+                       Margin="0,20"/>
+            <Border Grid.Row="1" 
+                    Background="#D9D9D9" 
+                    CornerRadius="40"
+                    Margin="10,10,10,20"
+                    HorizontalAlignment="Center">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" 
+                                HorizontalAlignment="Center"
+                                Margin="10">
+                        <Button x:Name="EmpleadosButton"
+                                Style="{StaticResource MenuButtonStyle}"
+                                Click="MenuButton_Click"
+                                Tag="Empleados"
+                                Padding="5,10,15,10">
+                            <Grid>
+                                <Image Width="20"
+                                       Height="20"
+                                       HorizontalAlignment="Left"
+                                       Margin="8,0,0,0"
+                                       IsHitTestVisible="False">
+                                    <Image.Source>
+                                        <BitmapImage UriSource="pack://application:,,,/Resources/employee.png"/>
+                                    </Image.Source>
+                                </Image>
+                                <TextBlock Text="Empleados"
+                                           Padding="35,0,0,0"
+                                           VerticalAlignment="Center"
+                                           FontSize="16"
+                                           Foreground="Black"/>
+                            </Grid>
+                        </Button>
+                        <Button x:Name="ProductosButton"
+                                Style="{StaticResource MenuButtonStyle}"
+                                Click="MenuButton_Click"
+                                Tag="Productos"
+                                Padding="5,10,15,10">
+                            <Grid>
+                                <Image Width="20"
+                                       Height="20"
+                                       HorizontalAlignment="Left"
+                                       Margin="8,0,0,0"
+                                       IsHitTestVisible="False">
+                                    <Image.Source>
+                                        <BitmapImage UriSource="pack://application:,,,/Resources/boxes.png"/>
+                                    </Image.Source>
+                                </Image>
+                                <TextBlock Text="Productos"
+                                           Padding="35,0,0,0"
+                                           VerticalAlignment="Center"
+                                           FontSize="16"
+                                           Foreground="Black"/>
+                            </Grid>
+                        </Button>
+                        <Button x:Name="ImpresorasButton"
+                                Style="{StaticResource MenuButtonStyle}"
+                                Click="MenuButton_Click"
+                                Tag="Impresoras"
+                                Padding="5,10,15,10">
+                            <Grid>
+                                <Image Width="20"
+                                       Height="20"
+                                       HorizontalAlignment="Left"
+                                       Margin="8,0,0,0"
+                                       IsHitTestVisible="False">
+                                    <Image.Source>
+                                        <BitmapImage UriSource="pack://application:,,,/Resources/printer.png"/>
+                                    </Image.Source>
+                                </Image>
+                                <TextBlock Text="Impresoras"
+                                           Padding="35,0,0,0"
+                                           VerticalAlignment="Center"
+                                           FontSize="16"
+                                           Foreground="Black"/>
+                            </Grid>
+                        </Button>
+                        <Button x:Name="OtrosButton"
+                                Style="{StaticResource MenuButtonStyle}"
+                                Click="MenuButton_Click"
+                                Tag="Otros"
+                                Padding="5,10,15,10">
+                            <Grid>
+                                <Image Width="20"
+                                       Height="20"
+                                       HorizontalAlignment="Left"
+                                       Margin="8,0,0,0"
+                                       IsHitTestVisible="False">
+                                    <Image.Source>
+                                        <BitmapImage UriSource="pack://application:,,,/Resources/hand.png"/>
+                                    </Image.Source>
+                                </Image>
+                                <TextBlock Text="Otros"
+                                           Padding="35,0,0,0"
+                                           VerticalAlignment="Center"
+                                           FontSize="16"
+                                           Foreground="Black"/>
+                            </Grid>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            <Border Grid.Row="3" 
+                    Background="White" 
+                    CornerRadius="20,20,20,20"
+                    BorderBrush="#E0E0E0"
+                    BorderThickness="1,0,1,1">
+                <Grid>
+                    <Grid x:Name="Tab1Content" 
+                          Visibility="Collapsed">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0"
+                              Margin="0,10,10,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Lista de Empleados"
+                                       FontSize="26"
+                                       FontWeight="Bold"
+                                       Margin="20,0"
+                                       Foreground="#333333"/>
+                            <Border Grid.Column="1"
+                                    Height="40"
+                                    Margin="50,0,10,0"
+                                    HorizontalAlignment="Stretch"
+                                    CornerRadius="10"
+                                    Background="#D9D9D9"
+                                    Padding="3">
+                                <Grid>
+                                    <TextBox x:Name="EmployeesSearchTextBox" 
+                                             Padding="5,0,35,0"
+                                             VerticalContentAlignment="Center"
+                                             HorizontalAlignment="Stretch"
+                                             BorderThickness="0"
+                                             Background="Transparent"
+                                             FontSize="16"/>
+                                    <TextBlock Text="Buscar"
+                                               Padding="5,0,35,0"
+                                               VerticalAlignment="Center"
+                                               FontSize="16"
+                                               Foreground="#808080"
+                                               IsHitTestVisible="False">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Text, ElementName=EmployeesSearchTextBox}" Value="">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <TextBlock Text="🔍"
+                                               FontSize="18"
+                                               HorizontalAlignment="Right"
+                                               VerticalAlignment="Center"
+                                               Margin="10,0,0,0"
+                                               Foreground="#808080"
+                                               IsHitTestVisible="False"/>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                        <TextBlock Grid.Row="1"
+                                   Text="Personal registrado en el sistema"
+                                   Margin="20,0,0,0"
+                                   FontSize="20"
+                                   Foreground="#333333"/>
+
+                        <Border Grid.Row="2"
+                                Background="#F9F9F9"
+                                Margin="20,10"
+                                CornerRadius="5"
+                                Padding="10">
+                            <DataGrid x:Name="EmployeesDataGrid"
+                                      AutoGenerateColumns="False"
+                                      ItemsSource="{Binding Users}"
+                                      IsReadOnly="True"
+                                      HeadersVisibility="Column"
+                                      CanUserReorderColumns="False"
+                                      CanUserResizeColumns="False"
+                                      AlternatingRowBackground="#FFF7F7F7"
+                                      RowBackground="White"
+                                      GridLinesVisibility="None"
+                                      BorderThickness="0"
+                                      Margin="0"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Stretch"
+                                      FontSize="20"
+                                      FontWeight="DemiBold">
+                                <DataGrid.RowStyle>
+                                    <Style TargetType="DataGridRow">
+                                        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                        <Setter Property="BorderBrush" Value="Black"/>
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="Foreground" Value="Black"/>
+                                        <Setter Property="OverridesDefaultStyle" Value="False"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="Transparent"/>
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Foreground" Value="Black"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGrid.RowStyle>
+                                <DataGrid.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="Foreground" Value="Black"/>
+                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Foreground" Value="Black"/>
+                                                <Setter Property="BorderThickness" Value="0"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGrid.CellStyle>
+                                <DataGrid.ColumnHeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                        <Setter Property="BorderBrush" Value="Black"/>
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                        <Setter Property="Margin" Value="5,5,5,5"/>
+                                        <Setter Property="FontWeight" Value="DemiBold"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="Transparent"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="N. empleado" 
+                                                        Binding="{Binding IdUser}" 
+                                                        Width="*" 
+                                                        FontSize="18"
+                                                        ElementStyle="{StaticResource DataGridCellTextStyle}"/>
+                                    <DataGridTextColumn Header="Usuario" 
+                                                        Binding="{Binding Username}" 
+                                                        Width="*" 
+                                                        FontSize="18"
+                                                        ElementStyle="{StaticResource DataGridCellTextStyle}"/>
+                                    <DataGridTextColumn Header="Nombre" 
+                                                        Binding="{Binding Names}" 
+                                                        Width="*" 
+                                                        FontSize="18"
+                                                        ElementStyle="{StaticResource DataGridCellTextStyle}"/>
+                                    <DataGridTextColumn Header="Apellido" 
+                                                        Binding="{Binding Lastnames}" 
+                                                        Width="*" 
+                                                        FontSize="18"
+                                                        ElementStyle="{StaticResource DataGridCellTextStyle}"/>
+                                    <DataGridTextColumn Header="Email" 
+                                                        Binding="{Binding Email}" 
+                                                        Width="*" 
+                                                        FontSize="18"
+                                                        ElementStyle="{StaticResource DataGridCellTextStyle}"/>
+                                    <DataGridTemplateColumn Header="Rol" Width="*">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Border Background="{Binding Role, Converter={StaticResource RoleToBrushConverter}}"
+                                                        CornerRadius="8"
+                                                        Padding="6,4"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center"
+                                                        SnapsToDevicePixels="True">
+                                                    <TextBlock Text="{Binding Role, Converter={StaticResource RoleDisplayConverter}}"
+                                                               FontSize="18"
+                                                               FontWeight="DemiBold"
+                                                               Foreground="#111111"
+                                                               VerticalAlignment="Center"
+                                                               HorizontalAlignment="Center"/>
+                                                </Border>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Editar" 
+                                                            Width="Auto">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Padding="15,5"
+                                                        Margin="5,8"
+                                                        Tag="{Binding}"
+                                                        Click="EditUser_Click"
+                                                        BorderThickness="0"
+                                                        Background="Transparent"
+                                                        HorizontalAlignment="Center"
+                                                        Cursor="Hand">
+                                                    <Image Width="20"
+                                                           Height="20"
+                                                           Stretch="Uniform"
+                                                           Source="pack://application:,,,/Resources/pencil.png"/>
+                                                </Button>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Border>
+                    </Grid>
+
+                    <Grid x:Name="Tab2Content" 
+                          Visibility="Visible">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" 
+                                   Text="Administrador de Productos"
+                                   FontSize="24"
+                                   HorizontalAlignment="Center"
+                                   FontWeight="Bold"
+                                   Margin="20,0"
+                                   Foreground="#333333"/>
+                        <TextBlock Grid.Row="1"
+                                   Margin="10,0"
+                                   Text="Gestiona el inventario productos"
+                                   HorizontalAlignment="Center"
+                                   FontSize="18"
+                                   Foreground="#333333"/>
+                        <Grid Grid.Row="2"
+                              Margin="10,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="1"
+                                    Margin="250,0,50,0"
+                                    HorizontalAlignment="Stretch"
+                                    Background="#D9D9D9"
+                                    Foreground="Black"
+                                    FontSize="18"
+                                    Cursor="Hand"
+                                    Click="AddProductButton_Click">
+                                <StackPanel Orientation="Horizontal" 
+                                            VerticalAlignment="Center" 
+                                            HorizontalAlignment="Center">
+                                    <Image Source="pack://application:,,,/Resources/mas.png"
+                                           Width="18" 
+                                           Height="18" 
+                                           Margin="0,0,8,0" 
+                                           IsHitTestVisible="False"/>
+                                    <TextBlock Text="Agregar Producto" 
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Border Grid.Column="0"
+                                    Height="40"
+                                    Margin="50,0"
+                                    HorizontalAlignment="Stretch"
+                                    CornerRadius="10"
+                                    Background="#D9D9D9"
+                                    Padding="3">
+                                <Grid>
+                                    <TextBox x:Name="ProductsSearchTextBox" 
+                                             Padding="5,0,35,0"
+                                             VerticalContentAlignment="Center"
+                                             HorizontalAlignment="Stretch"
+                                             BorderThickness="0"
+                                             Background="Transparent"
+                                             FontSize="16"/>
+                                    <TextBlock Text="Buscar"
+                                               Padding="5,0,35,0"
+                                               VerticalAlignment="Center"
+                                               FontSize="16"
+                                               Foreground="#808080"
+                                               IsHitTestVisible="False">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" 
+                                                        Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Text, ElementName=EmployeesSearchTextBox}" Value="">
+                                                        <Setter Property="Visibility" 
+                                                                Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <TextBlock Text="🔍"
+                                               FontSize="18"
+                                               HorizontalAlignment="Right"
+                                               VerticalAlignment="Center"
+                                               Margin="10,0,0,0"
+                                               Foreground="#808080"
+                                               IsHitTestVisible="False"/>
+                                </Grid>
+                            </Border>
+                        </Grid>
+
+                        <Border Grid.Row="3"
+                                Background="#F9F9F9"
+                                Margin="20,10"
+                                CornerRadius="5"
+                                Padding="10">
+                            <DataGrid x:Name="ProductsDataGrid"
+                                      AutoGenerateColumns="False"
+                                      ItemsSource="{Binding Products}"
+                                      IsReadOnly="True"
+                                      HeadersVisibility="Column"
+                                      CanUserReorderColumns="False"
+                                      CanUserResizeColumns="False"
+                                      AlternatingRowBackground="#FFF7F7F7"
+                                      RowBackground="White"
+                                      GridLinesVisibility="None"
+                                      BorderThickness="0"
+                                      Margin="0"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Stretch"
+                                      FontSize="20"
+                                      FontWeight="DemiBold">
+                                <DataGrid.RowStyle>
+                                    <Style TargetType="DataGridRow">
+                                        <Setter Property="BorderThickness" 
+                                                Value="0,0,0,1"/>
+                                        <Setter Property="BorderBrush" 
+                                                Value="Black"/>
+                                        <Setter Property="Background" 
+                                                Value="Transparent"/>
+                                        <Setter Property="Foreground" 
+                                                Value="Black"/>
+                                        <Setter Property="OverridesDefaultStyle" 
+                                                Value="False"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" 
+                                                     Value="True">
+                                                <Setter Property="Background" 
+                                                        Value="Transparent"/>
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" 
+                                                     Value="True">
+                                                <Setter Property="Background" 
+                                                        Value="Transparent"/>
+                                                <Setter Property="Foreground" 
+                                                        Value="Black"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGrid.RowStyle>
+                                <DataGrid.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <Setter Property="BorderThickness" 
+                                                Value="0"/>
+                                        <Setter Property="Background" 
+                                                Value="Transparent"/>
+                                        <Setter Property="Foreground" 
+                                                Value="Black"/>
+                                        <Setter Property="HorizontalContentAlignment" 
+                                                Value="Center"/>
+                                        <Setter Property="FocusVisualStyle" 
+                                                Value="{x:Null}"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsSelected" 
+                                                     Value="True">
+                                                <Setter Property="Background" 
+                                                        Value="Transparent"/>
+                                                <Setter Property="Foreground" 
+                                                        Value="Black"/>
+                                                <Setter Property="BorderThickness" 
+                                                        Value="0"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGrid.CellStyle>
+                                <DataGrid.ColumnHeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="BorderThickness" 
+                                                Value="0,0,0,1"/>
+                                        <Setter Property="BorderBrush" 
+                                                Value="Black"/>
+                                        <Setter Property="Background" 
+                                                Value="Transparent"/>
+                                        <Setter Property="HorizontalContentAlignment" 
+                                                Value="Center"/>
+                                        <Setter Property="Margin" 
+                                                Value="5,5,5,5"/>
+                                        <Setter Property="FontWeight" 
+                                                Value="DemiBold"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" 
+                                                     Value="True">
+                                                <Setter Property="Background" 
+                                                        Value="Transparent"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Producto"
+                                                        Binding="{Binding Item.Name}"
+                                                        Width="*"
+                                                        FontSize="18"
+                                                        ElementStyle="{StaticResource DataGridCellTextStyle}"/>
+                                    <DataGridTextColumn Header="Categoria"
+                                                        Binding="{Binding Item.Category}"
+                                                        Width="*"
+                                                        FontSize="18"
+                                                        ElementStyle="{StaticResource DataGridCellTextStyle}"/>
+                                    <DataGridTextColumn Header="Precio"
+                                                        Binding="{Binding Price, StringFormat=C}"
+                                                        Width="*"
+                                                        FontSize="18"
+                                                        ElementStyle="{StaticResource DataGridCellTextStyle}"/>
+                                    <DataGridTextColumn Header="Disponibilidad"
+                                                        Binding="{Binding Item.Available}"
+                                                        Width="*"
+                                                        FontSize="18"
+                                                        ElementStyle="{StaticResource DataGridCellTextStyle}"/>
+                                    <DataGridTemplateColumn Header="Editar" 
+                                                            Width="Auto">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Padding="15,5"
+                                                        Margin="5,8"
+                                                        Tag="{Binding}"
+                                                        Click="EditProduct_Click"
+                                                        BorderThickness="0"
+                                                        Background="Transparent"
+                                                        HorizontalAlignment="Center"
+                                                        Cursor="Hand">
+                                                    <Image Width="20"
+                                                           Height="20"
+                                                           Stretch="Uniform"
+                                                           Source="pack://application:,,,/Resources/pencil.png"/>
+                                                </Button>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Border>
+                    </Grid>
+
+                    <!-- Tab 3: Estadísticas -->
+                    <Grid x:Name="Tab3Content" 
+                          Visibility="Collapsed">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0"
+                                   Text="📊 Estadísticas"
+                                   FontSize="24"
+                                   FontWeight="Bold"
+                                   Margin="20"
+                                   Foreground="#333333"/>
+                        <Border Grid.Row="1" 
+                                Background="#F9F9F9"
+                                Margin="20"
+                                CornerRadius="5"
+                                Padding="20">
+                            <StackPanel>
+                                <TextBlock Text="Aquí irán las estadísticas y gráficos"
+                                           FontSize="16"
+                                           Foreground="#666666"/>
+                                <TextBlock Text="• Gráficos de datos"
+                                           FontSize="14"
+                                           Foreground="#888888"
+                                           Margin="0,10,0,0"/>
+                                <TextBlock Text="• Métricas importantes"
+                                           FontSize="14"
+                                           Foreground="#888888"/>
+                                <TextBlock Text="• Análisis de tendencias"
+                                           FontSize="14"
+                                           Foreground="#888888"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+        <Grid x:Name="NotificationContainer" 
+              IsHitTestVisible="False"
+              VerticalAlignment="Top"
+              HorizontalAlignment="Right"
+              Margin="20"/>
+    </Grid>
+</Window>

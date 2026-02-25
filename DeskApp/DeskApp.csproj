@@ -16,11 +16,13 @@
     <None Remove="Resources\boxes.png" />
     <None Remove="Resources\employee.png" />
     <None Remove="Resources\en.png" />
+    <None Remove="Resources\hand.png" />
     <None Remove="Resources\lock.png" />
+    <None Remove="Resources\mas.png" />
+    <None Remove="Resources\pencil.png" />
     <None Remove="Resources\phone.png" />
     <None Remove="Resources\printer.png" />
     <None Remove="Resources\user.png" />
-    <None Remove="appsettings.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,20 +33,13 @@
     <Resource Include="Resources\boxes.png" />
     <Resource Include="Resources\employee.png" />
     <Resource Include="Resources\en.png" />
+    <Resource Include="Resources\hand.png" />
     <Resource Include="Resources\lock.png" />
+    <Resource Include="Resources\mas.png" />
+    <Resource Include="Resources\pencil.png" />
     <Resource Include="Resources\phone.png" />
     <Resource Include="Resources\printer.png" />
     <Resource Include="Resources\user.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Utilities\" />
   </ItemGroup>
 
 </Project>
