@@ -15,6 +15,9 @@ namespace DeskApp
                 "manager" => "Gerente",
                 "supervisor" => "Supervisor",
                 "employee" => "Empleado",
+                "default" => "Por defecto",
+                "student" => "Estudiante",
+                "professor" => "Profesor",
                 _ => role ?? string.Empty
             };
         }
@@ -28,6 +31,9 @@ namespace DeskApp
                 "gerente" => "manager",
                 "supervisor" => "supervisor",
                 "empleado" => "employee",
+                "por defecto" => "default",
+                "estudiante" => "student",
+                "profesor" => "professor",
                 _ => display ?? string.Empty
             };
         }

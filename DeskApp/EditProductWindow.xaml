@@ -1,180 +1,55 @@
-<Window x:Class="DeskApp.EditProductWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:models="clr-namespace:DeskApp.Models"
-        xmlns:sys="clr-namespace:System;assembly=mscorlib"
-        mc:Ignorable="d"
-        Title="Editar Producto" 
-        Height="820" 
-        Width="700" 
-        WindowStartupLocation="CenterOwner">
+<Window
+    x:Class="DeskApp.EditProductWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="clr-namespace:DeskApp.Models"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    Title="Editar Producto"
+    Width="700"
+    Height="820"
+    WindowStartupLocation="CenterOwner"
+    mc:Ignorable="d">
     <Window.Resources>
-        <ObjectDataProvider x:Key="ItemCategories" 
-                            MethodName="GetValues" 
-                            ObjectType="{x:Type sys:Enum}">
+        <ObjectDataProvider
+            x:Key="ItemCategories"
+            MethodName="GetValues"
+            ObjectType="{x:Type sys:Enum}">
             <ObjectDataProvider.MethodParameters>
                 <x:Type TypeName="models:ItemCategory" />
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
         <Style TargetType="TextBox">
-            <Setter Property="Background" 
-                    Value="#D9D9D9"/>
-            <Setter Property="BorderThickness" 
-                    Value="0"/>
-            <Setter Property="Padding" 
-                    Value="2,2"/>
-            <Setter Property="FontSize" 
-                    Value="16"/>
+            <Setter Property="Background" Value="#D9D9D9" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="2,2" />
+            <Setter Property="FontSize" Value="16" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
-                        <Border Background="{TemplateBinding Background}"
-                                CornerRadius="8">
-                            <ScrollViewer x:Name="PART_ContentHost"
-                                          Margin="{TemplateBinding Padding}"/>
+                        <Border Background="{TemplateBinding Background}" CornerRadius="8">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" />
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
-        <Style TargetType="ComboBox">
-            <Setter Property="Background" 
-					Value="#D9D9D9"/>
-            <Setter Property="BorderThickness" 
-					Value="0"/>
-            <Setter Property="Padding" 
-					Value="8,4"/>
-            <Setter Property="FontSize" 
-					Value="16"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ComboBox">
-                        <Grid>
-                            <Border x:Name="Bd"
-                                    Background="{TemplateBinding Background}"
-                                    CornerRadius="8"/>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition Width="32"/>
-                                </Grid.ColumnDefinitions>
-                                <ContentPresenter Grid.Column="0"
-                                                  Margin="{TemplateBinding Padding}"
-                                                  Content="{Binding SelectedItem, RelativeSource={RelativeSource TemplatedParent}}"
-                                                  ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
-                                                  VerticalAlignment="Center"
-                                                  HorizontalAlignment="Stretch"/>
-                                <ToggleButton x:Name="ToggleButton"
-                                              Grid.Column="1"
-                                              Focusable="False"
-                                              IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
-                                              Background="Transparent"
-                                              BorderThickness="0"
-                                              HorizontalContentAlignment="Center"
-                                              VerticalContentAlignment="Center"
-                                              Cursor="Hand"
-                                              OverridesDefaultStyle="True">
-                                    <ToggleButton.Template>
-                                        <ControlTemplate TargetType="ToggleButton">
-                                            <Border Background="Transparent" 
-													BorderThickness="0">
-                                                <Path Data="M 0 0 L 6 6 L 12 0 Z"
-                                                      Fill="#555"
-                                                      Stretch="Uniform"
-                                                      Width="12"
-                                                      Height="6"
-                                                      HorizontalAlignment="Center"
-                                                      VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </ToggleButton.Template>
-                                </ToggleButton>
-                            </Grid>
-                            <Popup x:Name="Popup"
-                                   Placement="Bottom"
-                                   IsOpen="{TemplateBinding IsDropDownOpen}"
-                                   AllowsTransparency="True"
-                                   Focusable="False"
-                                   PopupAnimation="None">
-                                <Border Background="#D9D9D9"
-                                        CornerRadius="8 8 8 8"
-                                        MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ComboBox}}">
-                                    <ScrollViewer Margin="0"
-                                                  SnapsToDevicePixels="True">
-                                        <ItemsPresenter/>
-                                    </ScrollViewer>
-                                </Border>
-                            </Popup>
-                        </Grid>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Setter Property="ItemContainerStyle">
-                <Setter.Value>
-                    <Style TargetType="ComboBoxItem">
-                        <Setter Property="Background" 
-								Value="Transparent"/>
-                        <Setter Property="BorderThickness" 
-								Value="0"/>
-                        <Setter Property="FontSize" 
-								Value="16"/>
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="ComboBoxItem">
-                                    <Border x:Name="Bd" 
-                                            Background="{TemplateBinding Background}" 
-                                            CornerRadius="8 8 8 8" 
-                                            Padding="8,4">
-                                        <ContentPresenter Margin="0"
-                                                          HorizontalAlignment="Left"
-                                                          VerticalAlignment="Center"/>
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" 
-												 Value="True">
-                                            <Setter TargetName="Bd" 
-													Property="Background" 
-													Value="#E0E0E0"/>
-                                            <Setter Property="Cursor" 
-													Value="Hand"/>
-                                        </Trigger>
-                                        <Trigger Property="IsSelected" 
-												 Value="True">
-                                            <Setter TargetName="Bd" 
-													Property="Background" 
-													Value="#C0C0C0"/>
-                                        </Trigger>
-                                        <Trigger Property="IsEnabled" 
-												 Value="False">
-                                            <Setter TargetName="Bd" 
-													Property="Opacity" 
-													Value="0.6"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </Setter.Value>
-            </Setter>
-        </Style>
         <Style TargetType="Button">
-            <Setter Property="Padding" 
-					Value="8,4"/>
-            <Setter Property="FontSize" 
-					Value="18"/>
+            <Setter Property="Padding" Value="8,4" />
+            <Setter Property="FontSize" Value="18" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="8">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"
-                                              Margin="{TemplateBinding Padding}"/>
+                        <Border
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="8">
+                            <ContentPresenter
+                                Margin="{TemplateBinding Padding}"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center" />
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -188,109 +63,159 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TextBlock Text="Editar Producto" 
-				   FontSize="24" 
-				   FontWeight="Bold"
-				   Margin="4" />
+        <TextBlock
+            Margin="4"
+            FontSize="24"
+            FontWeight="Bold"
+            Text="Editar Producto" />
 
-        <StackPanel Grid.Row="1" 
-					  Margin="0,8,0,8">
-            <StackPanel Orientation="Vertical" 
-						Margin="4" 
-						Width="660">
+        <StackPanel Grid.Row="1" Margin="0,8,0,8">
+            <StackPanel
+                Width="660"
+                Margin="4"
+                Orientation="Vertical">
 
-                <GroupBox Header="Articulo" 
-					      Margin="0,8"
-                          FontWeight="Bold" 
-                          FontSize="18">
-                    <StackPanel Orientation="Vertical" 
-							    Margin="6">
-                        <StackPanel Orientation="Horizontal" 
-								    Margin="0,4">
-                            <TextBlock Width="160"
-                                       FontWeight="Bold" 
-                                       FontSize="17">Nombre:</TextBlock>
-                            <TextBox Text="{Binding Item.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-								     Width="400" 
-                                     FontSize="16"/>
+                <GroupBox
+                    Margin="0,8"
+                    FontSize="18"
+                    FontWeight="Bold"
+                    Header="Articulo">
+                    <StackPanel Margin="6" Orientation="Vertical">
+                        <StackPanel Margin="0,4" Orientation="Horizontal">
+                            <TextBlock
+                                Width="160"
+                                FontSize="17"
+                                FontWeight="Bold">
+                                Nombre:
+                            </TextBlock>
+                            <TextBox
+                                Width="400"
+                                FontSize="16"
+                                FontWeight="Normal"
+                                Text="{Binding Item.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" 
-						            Margin="0,4">
-                            <TextBlock Width="160" 
-						               VerticalAlignment="Center"
-                                       FontWeight="Bold" 
-                                       FontSize="18">Descripción:</TextBlock>
-                            <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" 
-						             Width="400" 
-                                     FontSize="16"/>
+                        <StackPanel Margin="0,4" Orientation="Horizontal">
+                            <TextBlock
+                                Width="160"
+                                VerticalAlignment="Center"
+                                FontSize="18"
+                                FontWeight="Bold">
+                                Descripción:
+                            </TextBlock>
+                            <TextBox
+                                Width="400"
+                                FontSize="16"
+                                FontWeight="Normal"
+                                Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" 
-						            Margin="0,4">
-                            <TextBlock Width="160" 
-						               VerticalAlignment="Center"
-                                       FontWeight="Bold" 
-                                       FontSize="18">Precio:</TextBlock>
-                            <TextBox x:Name="PriceTextBox" 
-						             Text="{Binding Price, StringFormat=N2, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-						             Width="120" 
-                                     FontSize="16"/>
+                        <StackPanel Margin="0,4" Orientation="Horizontal">
+                            <TextBlock
+                                Width="160"
+                                VerticalAlignment="Center"
+                                FontSize="18"
+                                FontWeight="Bold">
+                                Precio:
+                            </TextBlock>
+                            <TextBox
+                                x:Name="PriceTextBox"
+                                Width="120"
+                                FontSize="16"
+                                FontWeight="Normal"
+                                Text="{Binding Price, StringFormat=N2, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" 
-								    Margin="0,4">
-                            <TextBlock Width="160"
-                                       FontWeight="Bold" 
-                                       FontSize="17">Disponible:</TextBlock>
-                            <CheckBox IsChecked="{Binding Item.Available, Mode=TwoWay}"
-                                      FontSize="16"/>
+                        <StackPanel Margin="0,4" Orientation="Horizontal">
+                            <TextBlock
+                                Width="160"
+                                FontSize="17"
+                                FontWeight="Bold">
+                                Disponible:
+                            </TextBlock>
+                            <CheckBox FontSize="16" IsChecked="{Binding Item.Available, Mode=TwoWay}" />
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" 
-								    Margin="0,4">
-                            <TextBlock Width="160"
-                                       FontWeight="Bold" 
-                                       FontSize="17">Categoria:</TextBlock>
-                            <ComboBox ItemsSource="{Binding Source={StaticResource ItemCategories}}"
-								      SelectedItem="{Binding Item.Category, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-								      Width="400" 
-                                      FontSize="16"/>
+                        <StackPanel Margin="0,4" Orientation="Horizontal">
+                            <TextBlock
+                                Width="160"
+                                FontSize="17"
+                                FontWeight="Bold">
+                                Categoria:
+                            </TextBlock>
+                            <Border
+                                Width="400"
+                                Padding="6,3"
+                                Background="#D9D9D9"
+                                CornerRadius="10">
+                                <ComboBox
+                                    VerticalContentAlignment="Center"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    FontSize="14"
+                                    FontWeight="Normal"
+                                    ItemsSource="{Binding Source={StaticResource ItemCategories}}"
+                                    SelectedItem="{Binding Item.Category, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            </Border>
                         </StackPanel>
                     </StackPanel>
                 </GroupBox>
-                <GroupBox Header="Imagen" 
-					      Margin="0,8"
-                          FontWeight="Bold" 
-                          FontSize="18">
+                <GroupBox
+                    Margin="0,8"
+                    FontSize="18"
+                    FontWeight="Bold"
+                    Header="Imagen">
                     <StackPanel>
-                        <StackPanel Orientation="Vertical" 
-							        Margin="6">
-                            <StackPanel Orientation="Horizontal" 
-                                        Margin="0,4">
-                                <TextBlock Width="160" 
-                                           VerticalAlignment="Center"
-                                           FontWeight="Bold" 
-                                           FontSize="18">Imagen:</TextBlock>
+                        <StackPanel Margin="6" Orientation="Vertical">
+                            <StackPanel Margin="0,4" Orientation="Horizontal">
+                                <TextBlock
+                                    Width="160"
+                                    VerticalAlignment="Center"
+                                    FontSize="18"
+                                    FontWeight="Bold">
+                                    Imagen:
+                                </TextBlock>
                                 <Grid Width="400">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="120" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBox Text="{Binding File.Filename, UpdateSourceTrigger=PropertyChanged}" 
-                                             Width="280" 
-                                             FontSize="16" Grid.Column="0" IsReadOnly="True"/>
-                                    <Button Grid.Column="1" Content="Cargar..." Click="UploadImageButton_Click" Width="110" Margin="8,0,0,0" Cursor="Hand"/>
+                                    <TextBox
+                                        Grid.Column="0"
+                                        Width="280"
+                                        FontSize="16"
+                                        FontWeight="Normal"
+                                        IsReadOnly="True"
+                                        Text="{Binding File.Filename, UpdateSourceTrigger=PropertyChanged}" />
+                                    <Button
+                                        Grid.Column="1"
+                                        Width="110"
+                                        Margin="8,0,0,0"
+                                        Click="UploadImageButton_Click"
+                                        Content="Cargar..."
+                                        Cursor="Hand" />
                                 </Grid>
                             </StackPanel>
                             <StackPanel Margin="0,4">
-                                <Border Margin="8,0,0,0" 
-                                        Background="#EEE" 
-                                        CornerRadius="6" 
-                                        Width="300" 
-                                        Height="300">
+                                <Border
+                                    Width="300"
+                                    Height="300"
+                                    Margin="8,0,0,0"
+                                    Background="#EEE"
+                                    CornerRadius="6">
                                     <Grid>
-                                        <Image x:Name="PreviewImage" 
-                                               Stretch="Uniform" 
-                                               Width="300" 
-                                               Height="300"/>
-                                        <Button x:Name="AdjustButton" Content="Ajustar" Width="90" Height="35" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,6,6,0" Click="AdjustButton_Click" Cursor="Hand" Background="Transparent"/>
+                                        <Image
+                                            x:Name="PreviewImage"
+                                            Width="300"
+                                            Height="300"
+                                            Stretch="Uniform" />
+                                        <Button
+                                            x:Name="AdjustButton"
+                                            Width="90"
+                                            Height="35"
+                                            Margin="0,6,6,0"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Background="Transparent"
+                                            Click="AdjustButton_Click"
+                                            Content="Ajustar"
+                                            Cursor="Hand" />
                                     </Grid>
                                 </Border>
                             </StackPanel>
@@ -299,34 +224,38 @@
                 </GroupBox>
             </StackPanel>
         </StackPanel>
-        <StackPanel Grid.Row="2" 
-					Orientation="Horizontal" 
-					HorizontalAlignment="Right" 
-					Margin="0,8,4,4">
-            <Button Content="Eliminar"
-                    Width="100"
-                    Margin="0,0,15,0"
-                    Click="DeleteButton_Click"
-                    Background="#FF4D4D"
-                    Foreground="White"
-                    FontSize="18"
-                    Cursor="Hand"/>
-            <Button x:Name="SaveButton" 
-                    Content="Guardar" 
-                    Width="100" 
-                    Margin="0,0,15,0" 
-                    Click="SaveButton_Click"
-                    Background="Transparent"
-                    FontSize="18"
-                    Cursor="Hand"/>
-            <Button x:Name="CancelButton" 
-                    Content="Cancelar" 
-                    Width="100" 
-                    Click="CancelButton_Click"
-                    Background="Black"
-                    Foreground="White"
-                    FontSize="18"
-                    Cursor="Hand"/>
+        <StackPanel
+            Grid.Row="2"
+            Margin="0,8,4,4"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal">
+            <Button
+                Width="100"
+                Margin="0,0,15,0"
+                Background="#FF4D4D"
+                Click="DeleteButton_Click"
+                Content="Eliminar"
+                Cursor="Hand"
+                FontSize="18"
+                Foreground="White" />
+            <Button
+                x:Name="SaveButton"
+                Width="100"
+                Margin="0,0,15,0"
+                Background="Transparent"
+                Click="SaveButton_Click"
+                Content="Guardar"
+                Cursor="Hand"
+                FontSize="18" />
+            <Button
+                x:Name="CancelButton"
+                Width="100"
+                Background="Black"
+                Click="CancelButton_Click"
+                Content="Cancelar"
+                Cursor="Hand"
+                FontSize="18"
+                Foreground="White" />
         </StackPanel>
     </Grid>
 </Window>

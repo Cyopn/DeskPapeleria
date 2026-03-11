@@ -27,6 +27,7 @@ namespace DeskApp.Models
         public int Amount { get; set; }
 
         [JsonPropertyName("price")]
+        [JsonConverter(typeof(DeskApp.DecimalConverter))]
         public decimal Price { get; set; }
 
         [JsonPropertyName("created_at")]

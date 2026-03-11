@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -46,6 +47,63 @@ namespace DeskApp.Services
             }
         }
 
+        private static (string Message, List<string>? ValidationErrors) ExtractApiError(string? responseContent, int statusCode)
+        {
+            if (string.IsNullOrWhiteSpace(responseContent))
+                return ($"Error HTTP {statusCode}", null);
+
+            try
+            {
+                var errorResponse = JsonSerializer.Deserialize<ApiErrorResponse>(
+                    responseContent,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (errorResponse != null)
+                {
+                    var message = !string.IsNullOrWhiteSpace(errorResponse.Message)
+                        ? errorResponse.Message
+                        : (!string.IsNullOrWhiteSpace(errorResponse.Error)
+                            ? errorResponse.Error
+                            : $"Error HTTP {statusCode}");
+
+                    var errors = errorResponse.Errors;
+                    if ((errors == null || errors.Count == 0) && !string.IsNullOrWhiteSpace(errorResponse.Error))
+                    {
+                        errors = new List<string> { errorResponse.Error };
+                    }
+
+                    return (message, errors);
+                }
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                using var doc = JsonDocument.Parse(responseContent);
+                if (doc.RootElement.ValueKind == JsonValueKind.Object)
+                {
+                    if (doc.RootElement.TryGetProperty("message", out var msg) && msg.ValueKind == JsonValueKind.String)
+                    {
+                        var m = msg.GetString();
+                        if (!string.IsNullOrWhiteSpace(m)) return (m!, null);
+                    }
+
+                    if (doc.RootElement.TryGetProperty("error", out var err) && err.ValueKind == JsonValueKind.String)
+                    {
+                        var e = err.GetString();
+                        if (!string.IsNullOrWhiteSpace(e)) return (e!, null);
+                    }
+                }
+            }
+            catch
+            {
+            }
+
+            return (responseContent, null);
+        }
+
         public async Task<ApiResult<UserRegistrationResponse>> RegisterUserAsync(UserRegistrationRequest request)
         {
             var result = new ApiResult<UserRegistrationResponse>();
@@ -89,37 +147,9 @@ namespace DeskApp.Services
                 else
                 {
                     result.Success = false;
-                    
-                    try
-                    {
-                        var errorResponse = JsonSerializer.Deserialize<ApiErrorResponse>(
-                            responseContent,
-                            new JsonSerializerOptions
-                            {
-                                PropertyNameCaseInsensitive = true
-                            });
-
-                        if (errorResponse != null)
-                        {
-                            result.ErrorMessage = errorResponse.Message;
-                            result.ValidationErrors = errorResponse.Errors;
-
-                            if (errorResponse.Errors == null && !string.IsNullOrEmpty(errorResponse.Error))
-                            {
-                                result.ValidationErrors = new System.Collections.Generic.List<string> { errorResponse.Error };
-                            }
-                        }
-                        else
-                        {
-                            result.ErrorMessage = $"Error HTTP {result.StatusCode}";
-                        }
-                    }
-                    catch (JsonException)
-                    {
-                        result.ErrorMessage = !string.IsNullOrEmpty(responseContent) 
-                            ? responseContent 
-                            : $"Error HTTP {result.StatusCode}";
-                    }
+                    var parsed = ExtractApiError(responseContent, result.StatusCode);
+                    result.ErrorMessage = parsed.Message;
+                    result.ValidationErrors = parsed.ValidationErrors;
                 }
             }
             catch (TaskCanceledException)
@@ -187,37 +217,9 @@ namespace DeskApp.Services
                 else
                 {
                     result.Success = false;
-                    
-                    try
-                    {
-                        var errorResponse = JsonSerializer.Deserialize<ApiErrorResponse>(
-                            responseContent,
-                            new JsonSerializerOptions
-                            {
-                                PropertyNameCaseInsensitive = true
-                            });
-
-                        if (errorResponse != null)
-                        {
-                            result.ErrorMessage = errorResponse.Message;
-                            result.ValidationErrors = errorResponse.Errors;
-
-                            if (errorResponse.Errors == null && !string.IsNullOrEmpty(errorResponse.Error))
-                            {
-                                result.ValidationErrors = new System.Collections.Generic.List<string> { errorResponse.Error };
-                            }
-                        }
-                        else
-                        {
-                            result.ErrorMessage = $"Error HTTP {result.StatusCode}";
-                        }
-                    }
-                    catch (JsonException)
-                    {
-                        result.ErrorMessage = !string.IsNullOrEmpty(responseContent) 
-                            ? responseContent 
-                            : $"Error HTTP {result.StatusCode}";
-                    }
+                    var parsed = ExtractApiError(responseContent, result.StatusCode);
+                    result.ErrorMessage = parsed.Message;
+                    result.ValidationErrors = parsed.ValidationErrors;
                 }
             }
             catch (TaskCanceledException)
@@ -286,32 +288,9 @@ namespace DeskApp.Services
                 else
                 {
                     result.Success = false;
-                    try
-                    {
-                        var errorResponse = JsonSerializer.Deserialize<ApiErrorResponse>(
-                            responseContent,
-                            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                        if (errorResponse != null)
-                        {
-                            result.ErrorMessage = errorResponse.Message;
-                            result.ValidationErrors = errorResponse.Errors;
-                            if (errorResponse.Errors == null && !string.IsNullOrEmpty(errorResponse.Error))
-                            {
-                                result.ValidationErrors = new System.Collections.Generic.List<string> { errorResponse.Error };
-                            }
-                        }
-                        else
-                        {
-                            result.ErrorMessage = $"Error HTTP {result.StatusCode}";
-                        }
-                    }
-                    catch (JsonException)
-                    {
-                        result.ErrorMessage = !string.IsNullOrEmpty(responseContent)
-                            ? responseContent
-                            : $"Error HTTP {result.StatusCode}";
-                    }
+                    var parsed = ExtractApiError(responseContent, result.StatusCode);
+                    result.ErrorMessage = parsed.Message;
+                    result.ValidationErrors = parsed.ValidationErrors;
                 }
             }
             catch (TaskCanceledException)
@@ -402,32 +381,9 @@ namespace DeskApp.Services
                 else
                 {
                     result.Success = false;
-                    try
-                    {
-                        var errorResponse = JsonSerializer.Deserialize<ApiErrorResponse>(
-                            responseContent,
-                            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                        if (errorResponse != null)
-                        {
-                            result.ErrorMessage = errorResponse.Message;
-                            result.ValidationErrors = errorResponse.Errors;
-                            if (errorResponse.Errors == null && !string.IsNullOrEmpty(errorResponse.Error))
-                            {
-                                result.ValidationErrors = new System.Collections.Generic.List<string> { errorResponse.Error };
-                            }
-                        }
-                        else
-                        {
-                            result.ErrorMessage = $"Error HTTP {result.StatusCode}";
-                        }
-                    }
-                    catch (JsonException)
-                    {
-                        result.ErrorMessage = !string.IsNullOrEmpty(responseContent)
-                            ? responseContent
-                            : $"Error HTTP {result.StatusCode}";
-                    }
+                    var parsed = ExtractApiError(responseContent, result.StatusCode);
+                    result.ErrorMessage = parsed.Message;
+                    result.ValidationErrors = parsed.ValidationErrors;
                 }
             }
             catch (TaskCanceledException)
@@ -485,32 +441,8 @@ namespace DeskApp.Services
                 else
                 {
                     result.Success = false;
-                    try
-                    {
-                        var errorResponse = JsonSerializer.Deserialize<ApiErrorResponse>(
-                            responseContent,
-                            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                        if (errorResponse != null)
-                        {
-                            result.ErrorMessage = errorResponse.Message;
-                            result.ValidationErrors = errorResponse.Errors;
-                            if (errorResponse.Errors == null && !string.IsNullOrEmpty(errorResponse.Error))
-                            {
-                                result.ValidationErrors = new System.Collections.Generic.List<string> { errorResponse.Error };
-                            }
-                        }
-                        else
-                        {
-                            result.ErrorMessage = $"Error HTTP {result.StatusCode}";
-                        }
-                    }
-                    catch (JsonException)
-                    {
-                        result.ErrorMessage = !string.IsNullOrEmpty(responseContent)
-                            ? responseContent
-                            : $"Error HTTP {result.StatusCode}";
-                    }
+                    var parsed = ExtractApiError(responseContent, result.StatusCode);
+                    result.ErrorMessage = parsed.Message;
                 }
             }
             catch (TaskCanceledException)
@@ -584,6 +516,7 @@ namespace DeskApp.Services
                         {
                             result.Success = false;
                             result.ErrorMessage = "Respuesta de productos no contiene la propiedad 'products'";
+                            result.ValidationErrors = null;
                         }
                     }
                     catch (JsonException)
@@ -595,32 +528,9 @@ namespace DeskApp.Services
                 else
                 {
                     result.Success = false;
-                    try
-                    {
-                        var errorResponse = JsonSerializer.Deserialize<ApiErrorResponse>(
-                            responseContent,
-                            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                        if (errorResponse != null)
-                        {
-                            result.ErrorMessage = errorResponse.Message;
-                            result.ValidationErrors = errorResponse.Errors;
-                            if (errorResponse.Errors == null && !string.IsNullOrEmpty(errorResponse.Error))
-                            {
-                                result.ValidationErrors = new System.Collections.Generic.List<string> { errorResponse.Error };
-                            }
-                        }
-                        else
-                        {
-                            result.ErrorMessage = $"Error HTTP {result.StatusCode}";
-                        }
-                    }
-                    catch (JsonException)
-                    {
-                        result.ErrorMessage = !string.IsNullOrEmpty(responseContent)
-                            ? responseContent
-                            : $"Error HTTP {result.StatusCode}";
-                    }
+                    var parsed = ExtractApiError(responseContent, result.StatusCode);
+                    result.ErrorMessage = parsed.Message;
+                    result.ValidationErrors = parsed.ValidationErrors;
                 }
             }
             catch (TaskCanceledException)
@@ -724,32 +634,9 @@ namespace DeskApp.Services
                 else
                 {
                     result.Success = false;
-                    try
-                    {
-                        var errorResponse = JsonSerializer.Deserialize<ApiErrorResponse>(
-                            responseContent,
-                            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                        if (errorResponse != null)
-                        {
-                            result.ErrorMessage = errorResponse.Message;
-                            result.ValidationErrors = errorResponse.Errors;
-                            if (errorResponse.Errors == null && !string.IsNullOrEmpty(errorResponse.Error))
-                            {
-                                result.ValidationErrors = new System.Collections.Generic.List<string> { errorResponse.Error };
-                            }
-                        }
-                        else
-                        {
-                            result.ErrorMessage = $"Error HTTP {result.StatusCode}";
-                        }
-                    }
-                    catch (JsonException)
-                    {
-                        result.ErrorMessage = !string.IsNullOrEmpty(responseContent)
-                            ? responseContent
-                            : $"Error HTTP {result.StatusCode}";
-                    }
+                    var parsed = ExtractApiError(responseContent, result.StatusCode);
+                    result.ErrorMessage = parsed.Message;
+                    result.ValidationErrors = parsed.ValidationErrors;
                 }
             }
             catch (TaskCanceledException)
@@ -807,32 +694,8 @@ namespace DeskApp.Services
                 else
                 {
                     result.Success = false;
-                    try
-                    {
-                        var errorResponse = JsonSerializer.Deserialize<ApiErrorResponse>(
-                            responseContent,
-                            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                        if (errorResponse != null)
-                        {
-                            result.ErrorMessage = errorResponse.Message;
-                            result.ValidationErrors = errorResponse.Errors;
-                            if (errorResponse.Errors == null && !string.IsNullOrEmpty(errorResponse.Error))
-                            {
-                                result.ValidationErrors = new System.Collections.Generic.List<string> { errorResponse.Error };
-                            }
-                        }
-                        else
-                        {
-                            result.ErrorMessage = $"Error HTTP {result.StatusCode}";
-                        }
-                    }
-                    catch (JsonException)
-                    {
-                        result.ErrorMessage = !string.IsNullOrEmpty(responseContent)
-                            ? responseContent
-                            : $"Error HTTP {result.StatusCode}";
-                    }
+                    var parsed = ExtractApiError(responseContent, result.StatusCode);
+                    result.ErrorMessage = parsed.Message;
                 }
             }
             catch (TaskCanceledException)
@@ -878,8 +741,6 @@ namespace DeskApp.Services
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                 });
 
-                try { Console.WriteLine($"[ApiService] POST {url} - Request: {jsonContent}"); } catch { }
-
                 using var message = new HttpRequestMessage(HttpMethod.Post, url)
                 {
                     Content = new StringContent(jsonContent, Encoding.UTF8, "application/json")
@@ -888,8 +749,6 @@ namespace DeskApp.Services
 
                 var response = await _httpClient.SendAsync(message);
                 var responseContent = await response.Content.ReadAsStringAsync();
-
-                try { Console.WriteLine($"[ApiService] POST {url} - Status: {(int)response.StatusCode} - Response: {responseContent}"); } catch { }
 
                 result.StatusCode = (int)response.StatusCode;
 
@@ -925,28 +784,8 @@ namespace DeskApp.Services
                 else
                 {
                     result.Success = false;
-                    try
-                    {
-                        var errorResponse = JsonSerializer.Deserialize<ApiErrorResponse>(
-                            responseContent,
-                            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                        if (errorResponse != null)
-                        {
-                            result.ErrorMessage = errorResponse.Message;
-                            result.ValidationErrors = errorResponse.Errors;
-                        }
-                        else
-                        {
-                            result.ErrorMessage = $"Error HTTP {result.StatusCode}";
-                        }
-                    }
-                    catch (JsonException)
-                    {
-                        result.ErrorMessage = !string.IsNullOrEmpty(responseContent)
-                            ? responseContent
-                            : $"Error HTTP {result.StatusCode}";
-                    }
+                    var parsed = ExtractApiError(responseContent, result.StatusCode);
+                    result.ErrorMessage = parsed.Message;
                 }
             }
             catch (TaskCanceledException)
@@ -968,6 +807,593 @@ namespace DeskApp.Services
                 result.ErrorMessage = $"Error inesperado: {ex.Message}";
             }
 
+            return result;
+        }
+
+        public async Task<ApiResult<List<PrinterData>>> GetPrintersAsync(string bearerToken)
+        {
+            var result = new ApiResult<List<PrinterData>>();
+
+            try
+            {
+                var url = _config.GetFullUrl("/printers");
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+
+                if (string.IsNullOrWhiteSpace(bearerToken))
+                {
+                    result.Success = false;
+                    result.StatusCode = 401;
+                    result.ErrorMessage = "Token de autenticación no disponible";
+                    return result;
+                }
+
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+
+                var response = await _httpClient.SendAsync(request);
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                result.StatusCode = (int)response.StatusCode;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    try
+                    {
+                        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                        options.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+
+                        using var doc = JsonDocument.Parse(responseContent);
+                        var root = doc.RootElement;
+
+                        List<PrinterData>? parsed = null;
+
+                        if (root.ValueKind == JsonValueKind.Object)
+                        {
+                            if (root.TryGetProperty("printers", out var printersProp) && printersProp.ValueKind == JsonValueKind.Array)
+                            {
+                                parsed = JsonSerializer.Deserialize<List<PrinterData>>(printersProp.GetRawText(), options);
+                            }
+                            else if (root.TryGetProperty("data", out var dataProp) && dataProp.ValueKind == JsonValueKind.Array)
+                            {
+                                parsed = JsonSerializer.Deserialize<List<PrinterData>>(dataProp.GetRawText(), options);
+                            }
+                            else if (root.TryGetProperty("printer", out var printerProp) && printerProp.ValueKind == JsonValueKind.Object)
+                            {
+                                var single = JsonSerializer.Deserialize<PrinterData>(printerProp.GetRawText(), options);
+                                if (single != null) parsed = new List<PrinterData> { single };
+                            }
+                        }
+                        else if (root.ValueKind == JsonValueKind.Array)
+                        {
+                            parsed = JsonSerializer.Deserialize<List<PrinterData>>(responseContent, options);
+                        }
+
+                        result.Success = true;
+                        result.Data = parsed ?? new List<PrinterData>();
+                    }
+                    catch (JsonException)
+                    {
+                        result.Success = false;
+                        result.ErrorMessage = "Error al procesar la respuesta del servidor";
+                    }
+                }
+                else
+                {
+                    result.Success = false;
+                    var parsed = ExtractApiError(responseContent, result.StatusCode);
+                    result.ErrorMessage = parsed.Message;
+                    result.ValidationErrors = parsed.ValidationErrors;
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = "La solicitud ha excedido el tiempo de espera";
+            }
+            catch (HttpRequestException ex)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = $"Error de conexión: {ex.Message}";
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = $"Error inesperado: {ex.Message}";
+            }
+
+            return result;
+        }
+
+        public async Task<ApiResult<List<TransactionData>>> GetTransactionsAsync(string bearerToken)
+        {
+            var result = new ApiResult<List<TransactionData>>();
+
+            try
+            {
+                var url = _config.GetFullUrl("/transactions");
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+
+                if (string.IsNullOrWhiteSpace(bearerToken))
+                {
+                    result.Success = false;
+                    result.StatusCode = 401;
+                    result.ErrorMessage = "Token de autenticación no disponible";
+                    return result;
+                }
+
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+                var response = await _httpClient.SendAsync(request);
+                var responseContent = await response.Content.ReadAsStringAsync();
+                result.StatusCode = (int)response.StatusCode;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    using var doc = JsonDocument.Parse(responseContent);
+                    var root = doc.RootElement;
+                    List<TransactionData>? parsed = null;
+
+                    if (root.ValueKind == JsonValueKind.Object && root.TryGetProperty("transactions", out var txs) && txs.ValueKind == JsonValueKind.Array)
+                    {
+                        parsed = JsonSerializer.Deserialize<List<TransactionData>>(txs.GetRawText(), options);
+                    }
+                    else if (root.ValueKind == JsonValueKind.Array)
+                    {
+                        parsed = JsonSerializer.Deserialize<List<TransactionData>>(responseContent, options);
+                    }
+                    else if (root.ValueKind == JsonValueKind.Object)
+                    {
+                        var single = JsonSerializer.Deserialize<TransactionData>(responseContent, options);
+                        if (single != null) parsed = new List<TransactionData> { single };
+                    }
+
+                    result.Success = true;
+                    result.Data = parsed ?? new List<TransactionData>();
+                }
+                else
+                {
+                    result.Success = false;
+                    var parsed = ExtractApiError(responseContent, result.StatusCode);
+                    result.ErrorMessage = parsed.Message;
+                    result.ValidationErrors = parsed.ValidationErrors;
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = $"Error inesperado: {ex.Message}";
+            }
+
+            return result;
+        }
+
+        public async Task<ApiResult<TransactionData>> GetTransactionByIdAsync(int transactionId, string bearerToken)
+        {
+            var result = new ApiResult<TransactionData>();
+
+            try
+            {
+                var url = _config.GetFullUrl($"/transactions/{transactionId}");
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+
+                if (string.IsNullOrWhiteSpace(bearerToken))
+                {
+                    result.Success = false;
+                    result.StatusCode = 401;
+                    result.ErrorMessage = "Token de autenticación no disponible";
+                    return result;
+                }
+
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+                var response = await _httpClient.SendAsync(request);
+                var responseContent = await response.Content.ReadAsStringAsync();
+                result.StatusCode = (int)response.StatusCode;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    using var doc = JsonDocument.Parse(responseContent);
+                    var root = doc.RootElement;
+
+                    TransactionData? tx = null;
+                    if (root.ValueKind == JsonValueKind.Object && root.TryGetProperty("transaction", out var txProp) && txProp.ValueKind == JsonValueKind.Object)
+                    {
+                        tx = JsonSerializer.Deserialize<TransactionData>(txProp.GetRawText(), options);
+                    }
+                    else if (root.ValueKind == JsonValueKind.Object)
+                    {
+                        tx = JsonSerializer.Deserialize<TransactionData>(responseContent, options);
+                    }
+
+                    if (tx == null)
+                    {
+                        result.Success = false;
+                        result.ErrorMessage = "No se pudo interpretar el detalle de la transacción";
+                    }
+                    else
+                    {
+                        result.Success = true;
+                        result.Data = tx;
+                    }
+                }
+                else
+                {
+                    result.Success = false;
+                    var parsed = ExtractApiError(responseContent, result.StatusCode);
+                    result.ErrorMessage = parsed.Message;
+                    result.ValidationErrors = parsed.ValidationErrors;
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = $"Error inesperado: {ex.Message}";
+            }
+
+            return result;
+        }
+
+        public async Task<ApiResult<TransactionData>> CompleteTransactionAsync(int transactionId, string bearerToken)
+        {
+            var result = new ApiResult<TransactionData>();
+
+            try
+            {
+                var url = _config.GetFullUrl($"/transactions/{transactionId}/complete");
+                using var request = new HttpRequestMessage(HttpMethod.Patch, url);
+
+                if (string.IsNullOrWhiteSpace(bearerToken))
+                {
+                    result.Success = false;
+                    result.StatusCode = 401;
+                    result.ErrorMessage = "Token de autenticación no disponible";
+                    return result;
+                }
+
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+
+                var response = await _httpClient.SendAsync(request);
+                var responseContent = await response.Content.ReadAsStringAsync();
+                result.StatusCode = (int)response.StatusCode;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    try
+                    {
+                        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                        using var doc = JsonDocument.Parse(responseContent);
+
+                        TransactionData? tx = null;
+                        if (doc.RootElement.ValueKind == JsonValueKind.Object &&
+                            doc.RootElement.TryGetProperty("transaction", out var txElement) &&
+                            txElement.ValueKind == JsonValueKind.Object)
+                        {
+                            tx = JsonSerializer.Deserialize<TransactionData>(txElement.GetRawText(), options);
+                        }
+                        else if (doc.RootElement.ValueKind == JsonValueKind.Object)
+                        {
+                            tx = JsonSerializer.Deserialize<TransactionData>(responseContent, options);
+                        }
+
+                        result.Success = true;
+                        result.Data = tx;
+                    }
+                    catch (JsonException)
+                    {
+                        result.Success = true;
+                        result.Data = null;
+                    }
+                }
+                else
+                {
+                    result.Success = false;
+                    var parsed = ExtractApiError(responseContent, result.StatusCode);
+                    result.ErrorMessage = parsed.Message;
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = "La solicitud ha excedido el tiempo de espera";
+            }
+            catch (HttpRequestException ex)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = $"Error de conexión: {ex.Message}";
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = $"Error inesperado: {ex.Message}";
+            }
+
+            return result;
+        }
+
+        public async Task<ApiResult<bool>> UpdateTransactionFilesStatusAsync(int transactionId, string status, string bearerToken)
+        {
+            var result = new ApiResult<bool>();
+
+            try
+            {
+                var url = _config.GetFullUrl($"/transactions/{transactionId}/files/status");
+
+                if (string.IsNullOrWhiteSpace(bearerToken))
+                {
+                    result.Success = false;
+                    result.StatusCode = 401;
+                    result.ErrorMessage = "Token de autenticación no disponible";
+                    return result;
+                }
+
+                var payload = JsonSerializer.Serialize(new { status });
+                using var request = new HttpRequestMessage(HttpMethod.Patch, url)
+                {
+                    Content = new StringContent(payload, Encoding.UTF8, "application/json")
+                };
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+
+                var response = await _httpClient.SendAsync(request);
+                var responseContent = await response.Content.ReadAsStringAsync();
+                result.StatusCode = (int)response.StatusCode;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    result.Success = true;
+                    result.Data = true;
+                }
+                else
+                {
+                    result.Success = false;
+                    var parsed = ExtractApiError(responseContent, result.StatusCode);
+                    result.ErrorMessage = parsed.Message;
+                    result.ValidationErrors = parsed.ValidationErrors;
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = "La solicitud ha excedido el tiempo de espera";
+            }
+            catch (HttpRequestException ex)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = $"Error de conexión: {ex.Message}";
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = $"Error inesperado: {ex.Message}";
+            }
+
+            return result;
+        }
+
+        public async Task<ApiResult<bool>> UpdateProductSpecialServiceStatusAsync(int productId, string status, string bearerToken)
+        {
+            var result = new ApiResult<bool>();
+
+            try
+            {
+                var url = _config.GetFullUrl($"/products/{productId}/special-service/status");
+
+                if (string.IsNullOrWhiteSpace(bearerToken))
+                {
+                    result.Success = false;
+                    result.StatusCode = 401;
+                    result.ErrorMessage = "Token de autenticación no disponible";
+                    return result;
+                }
+
+                var payload = JsonSerializer.Serialize(new { status });
+                using var request = new HttpRequestMessage(HttpMethod.Patch, url)
+                {
+                    Content = new StringContent(payload, Encoding.UTF8, "application/json")
+                };
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+
+                var response = await _httpClient.SendAsync(request);
+                var responseContent = await response.Content.ReadAsStringAsync();
+                result.StatusCode = (int)response.StatusCode;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    result.Success = true;
+                    result.Data = true;
+                }
+                else
+                {
+                    result.Success = false;
+                    var parsed = ExtractApiError(responseContent, result.StatusCode);
+                    result.ErrorMessage = parsed.Message;
+                    result.ValidationErrors = parsed.ValidationErrors;
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = "La solicitud ha excedido el tiempo de espera";
+            }
+            catch (HttpRequestException ex)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = $"Error de conexión: {ex.Message}";
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = $"Error inesperado: {ex.Message}";
+            }
+
+            return result;
+        }
+
+        public async Task<ApiResult<PrinterData>> CreatePrinterAsync(PrinterData requestObj, string bearerToken)
+        {
+            var result = new ApiResult<PrinterData>();
+            try
+            {
+                var url = _config.GetFullUrl("/printers");
+                if (string.IsNullOrWhiteSpace(bearerToken))
+                {
+                    result.Success = false;
+                    result.StatusCode = 401;
+                    result.ErrorMessage = "Token de autenticación no disponible";
+                    return result;
+                }
+
+                var jsonContent = JsonSerializer.Serialize(requestObj, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
+                    Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+                });
+
+                using var message = new HttpRequestMessage(HttpMethod.Post, url)
+                {
+                    Content = new StringContent(jsonContent, Encoding.UTF8, "application/json")
+                };
+                message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+
+                var response = await _httpClient.SendAsync(message);
+                var responseContent = await response.Content.ReadAsStringAsync();
+                result.StatusCode = (int)response.StatusCode;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    using var doc = JsonDocument.Parse(responseContent);
+                    if (doc.RootElement.TryGetProperty("printer", out var printerElement) && printerElement.ValueKind == JsonValueKind.Object)
+                    {
+                        result.Data = JsonSerializer.Deserialize<PrinterData>(printerElement.GetRawText(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    }
+                    else
+                    {
+                        result.Data = JsonSerializer.Deserialize<PrinterData>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    }
+                    result.Success = true;
+                }
+                else
+                {
+                    result.Success = false;
+                    var parsed = ExtractApiError(responseContent, result.StatusCode);
+                    result.ErrorMessage = parsed.Message;
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = $"Error inesperado: {ex.Message}";
+            }
+            return result;
+        }
+
+        public async Task<ApiResult<PrinterData>> UpdatePrinterAsync(int printerId, PrinterData requestObj, string bearerToken)
+        {
+            var result = new ApiResult<PrinterData>();
+            try
+            {
+                var baseUrl = _config.GetFullUrl("/printers");
+                var url = baseUrl.EndsWith("/") ? $"{baseUrl}{printerId}" : $"{baseUrl}/{printerId}";
+
+                if (string.IsNullOrWhiteSpace(bearerToken))
+                {
+                    result.Success = false;
+                    result.StatusCode = 401;
+                    result.ErrorMessage = "Token de autenticación no disponible";
+                    return result;
+                }
+
+                var jsonContent = JsonSerializer.Serialize(requestObj, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
+                    Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+                });
+
+                using var message = new HttpRequestMessage(HttpMethod.Put, url)
+                {
+                    Content = new StringContent(jsonContent, Encoding.UTF8, "application/json")
+                };
+                message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+
+                var response = await _httpClient.SendAsync(message);
+                var responseContent = await response.Content.ReadAsStringAsync();
+                result.StatusCode = (int)response.StatusCode;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    result.Success = true;
+                    result.Data = JsonSerializer.Deserialize<PrinterData>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                }
+                else
+                {
+                    result.Success = false;
+                    var parsed = ExtractApiError(responseContent, result.StatusCode);
+                    result.ErrorMessage = parsed.Message;
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = $"Error inesperado: {ex.Message}";
+            }
+            return result;
+        }
+
+        public async Task<ApiResult<bool>> DeletePrinterAsync(int printerId, string bearerToken)
+        {
+            var result = new ApiResult<bool>();
+            try
+            {
+                var baseUrl = _config.GetFullUrl("/printers");
+                var url = baseUrl.EndsWith("/") ? $"{baseUrl}{printerId}" : $"{baseUrl}/{printerId}";
+                if (string.IsNullOrWhiteSpace(bearerToken))
+                {
+                    result.Success = false;
+                    result.StatusCode = 401;
+                    result.ErrorMessage = "Token de autenticación no disponible";
+                    return result;
+                }
+
+                using var message = new HttpRequestMessage(HttpMethod.Delete, url);
+                message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+                var response = await _httpClient.SendAsync(message);
+                var responseContent = await response.Content.ReadAsStringAsync();
+                result.StatusCode = (int)response.StatusCode;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    result.Success = true;
+                    result.Data = true;
+                }
+                else
+                {
+                    result.Success = false;
+                    var parsed = ExtractApiError(responseContent, result.StatusCode);
+                    result.ErrorMessage = parsed.Message;
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = $"Error inesperado: {ex.Message}";
+            }
             return result;
         }
     }

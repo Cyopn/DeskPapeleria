@@ -1,94 +1,85 @@
-﻿<Window x:Class="DeskApp.IndexWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:DeskApp"
-        mc:Ignorable="d"
-        Title="IndexWindow"
-        Height="700" 
-        Width="1050"
-        MinHeight="700" 
-        MinWidth="1050"
-        WindowState="Maximized">
+﻿<Window
+    x:Class="DeskApp.IndexWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:DeskApp"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="IndexWindow"
+    Width="1500"
+    Height="900"
+    MinWidth="1500"
+    MinHeight="900"
+    WindowState="Maximized"
+    mc:Ignorable="d">
     <Window.Resources>
-        <Style x:Key="MenuButtonStyle" 
-               TargetType="Button">
-            <Setter Property="Background" 
-                    Value="Transparent"/>
-            <Setter Property="Foreground" 
-                    Value="Black"/>
-            <Setter Property="BorderThickness" 
-                    Value="0"/>
-            <Setter Property="Padding" 
-                    Value="15,10"/>
-            <Setter Property="Margin" 
-                    Value="5"/>
-            <Setter Property="FontSize" 
-                    Value="16"/>
-            <Setter Property="FontWeight" 
-                    Value="Medium"/>
-            <Setter Property="Cursor" 
-                    Value="Hand"/>
+        <Style x:Key="MenuButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="15,10" />
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="25">
-                            <ContentPresenter HorizontalAlignment="Center" 
-                                              VerticalAlignment="Center"
-                                              Margin="{TemplateBinding Padding}"/>
+                        <Border
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="25">
+                            <ContentPresenter
+                                Margin="{TemplateBinding Padding}"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center" />
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
             <Style.Triggers>
-                <Trigger Property="IsMouseOver" 
-                         Value="True">
-                    <Setter Property="Background" 
-                            Value="#33FFFFFF"/>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#33FFFFFF" />
                 </Trigger>
             </Style.Triggers>
         </Style>
-        <Style x:Key="ActiveMenuButtonStyle" 
-               TargetType="Button" 
-               BasedOn="{StaticResource MenuButtonStyle}">
-            <Setter Property="Background" 
-                    Value="White"/>
+        <Style
+            x:Key="ActiveMenuButtonStyle"
+            BasedOn="{StaticResource MenuButtonStyle}"
+            TargetType="Button">
+            <Setter Property="Background" Value="White" />
             <Style.Triggers>
-                <Trigger Property="IsMouseOver" 
-                         Value="True">
-                    <Setter Property="Background" 
-                            Value="White"/>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="White" />
                 </Trigger>
             </Style.Triggers>
         </Style>
         <local:RoleDisplayConverter x:Key="RoleDisplayConverter" />
         <local:RoleToBrushConverter x:Key="RoleToBrushConverter" />
-        <Style x:Key="DataGridCellTextStyle" 
-               TargetType="TextBlock">
-            <Setter Property="HorizontalAlignment" 
-                    Value="Center"/>
-            <Setter Property="TextAlignment" 
-                    Value="Center"/>
-            <Setter Property="VerticalAlignment" 
-                    Value="Center"/>
+        <local:BoolSiNoConverter x:Key="BoolSiNoConverter" />
+        <local:StatusDisplayConverter x:Key="StatusDisplayConverter" />
+        <local:ConnectionTypeDisplayConverter x:Key="ConnectionTypeDisplayConverter" />
+        <local:PaymentMethodDisplayConverter x:Key="PaymentMethodDisplayConverter" />
+        <Style x:Key="DataGridCellTextStyle" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
         <Style TargetType="Button">
-            <Setter Property="Padding" 
-                    Value="8,4"/>
+            <Setter Property="Padding" Value="8,4" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="8">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"
-                                              Margin="{TemplateBinding Padding}"/>
+                        <Border
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="8">
+                            <ContentPresenter
+                                Margin="{TemplateBinding Padding}"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center" />
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -98,349 +89,455 @@
     <Grid>
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="1*"/>
+                <RowDefinition Height="3*" />
+                <RowDefinition Height="1*" />
             </Grid.RowDefinitions>
             <Grid Grid.Row="0">
                 <Grid>
-                    <Image Stretch="UniformToFill" 
-                           VerticalAlignment="Stretch" 
-                           HorizontalAlignment="Stretch">
+                    <Image
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        Stretch="UniformToFill">
                         <Image.Source>
-                            <BitmapImage UriSource="pack://application:,,,/Resources/bg-employee.png"/>
+                            <BitmapImage UriSource="pack://application:,,,/Resources/bg-employee.png" />
                         </Image.Source>
                     </Image>
-                    <Rectangle Fill="Black" 
-                               Opacity="0.6"/>
+                    <Rectangle Fill="Black" Opacity="0.6" />
                 </Grid>
             </Grid>
-            <Grid Grid.Row="1" 
-                  Background="White">
-            </Grid>
+            <Grid Grid.Row="1" Background="White" />
         </Grid>
         <Grid Margin="30">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" 
-                       Text="Centro de Administración" 
-                       FontSize="36" 
-                       FontWeight="Bold" 
-                       HorizontalAlignment="Center" 
-                       VerticalAlignment="Center"
-                       Foreground="White"
-                       Margin="0,20"/>
-            <Border Grid.Row="1" 
-                    Background="#D9D9D9" 
-                    CornerRadius="40"
-                    Margin="10,10,10,20"
-                    HorizontalAlignment="Center">
+            <TextBlock
+                Grid.Row="0"
+                Margin="0,20"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontSize="36"
+                FontWeight="Bold"
+                Foreground="White"
+                Text="Centro de Administración" />
+            <Border
+                Grid.Row="1"
+                Margin="10,10,10,20"
+                HorizontalAlignment="Center"
+                Background="#D9D9D9"
+                CornerRadius="40">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" 
-                                HorizontalAlignment="Center"
-                                Margin="10">
-                        <Button x:Name="EmpleadosButton"
-                                Style="{StaticResource MenuButtonStyle}"
-                                Click="MenuButton_Click"
-                                Tag="Empleados"
-                                Padding="5,10,15,10">
+                    <StackPanel
+                        Grid.Column="0"
+                        Margin="10"
+                        HorizontalAlignment="Center"
+                        Orientation="Horizontal">
+                        <Button
+                            x:Name="EmpleadosButton"
+                            Padding="5,10,15,10"
+                            Click="MenuButton_Click"
+                            Style="{StaticResource MenuButtonStyle}"
+                            Tag="Empleados">
                             <Grid>
-                                <Image Width="20"
-                                       Height="20"
-                                       HorizontalAlignment="Left"
-                                       Margin="8,0,0,0"
-                                       IsHitTestVisible="False">
+                                <Image
+                                    Width="20"
+                                    Height="20"
+                                    Margin="8,0,0,0"
+                                    HorizontalAlignment="Left"
+                                    IsHitTestVisible="False">
                                     <Image.Source>
-                                        <BitmapImage UriSource="pack://application:,,,/Resources/employee.png"/>
+                                        <BitmapImage UriSource="pack://application:,,,/Resources/employee.png" />
                                     </Image.Source>
                                 </Image>
-                                <TextBlock Text="Empleados"
-                                           Padding="35,0,0,0"
-                                           VerticalAlignment="Center"
-                                           FontSize="16"
-                                           Foreground="Black"/>
+                                <TextBlock
+                                    Padding="35,0,0,0"
+                                    VerticalAlignment="Center"
+                                    FontSize="17"
+                                    Foreground="Black"
+                                    Text="Empleados" />
                             </Grid>
                         </Button>
-                        <Button x:Name="ProductosButton"
-                                Style="{StaticResource MenuButtonStyle}"
-                                Click="MenuButton_Click"
-                                Tag="Productos"
-                                Padding="5,10,15,10">
+                        <Button
+                            x:Name="ProductosButton"
+                            Padding="5,10,15,10"
+                            Click="MenuButton_Click"
+                            Style="{StaticResource MenuButtonStyle}"
+                            Tag="Productos">
                             <Grid>
-                                <Image Width="20"
-                                       Height="20"
-                                       HorizontalAlignment="Left"
-                                       Margin="8,0,0,0"
-                                       IsHitTestVisible="False">
+                                <Image
+                                    Width="20"
+                                    Height="20"
+                                    Margin="8,0,0,0"
+                                    HorizontalAlignment="Left"
+                                    IsHitTestVisible="False">
                                     <Image.Source>
-                                        <BitmapImage UriSource="pack://application:,,,/Resources/boxes.png"/>
+                                        <BitmapImage UriSource="pack://application:,,,/Resources/boxes.png" />
                                     </Image.Source>
                                 </Image>
-                                <TextBlock Text="Productos"
-                                           Padding="35,0,0,0"
-                                           VerticalAlignment="Center"
-                                           FontSize="16"
-                                           Foreground="Black"/>
+                                <TextBlock
+                                    Padding="35,0,0,0"
+                                    VerticalAlignment="Center"
+                                    FontSize="17"
+                                    Foreground="Black"
+                                    Text="Productos" />
                             </Grid>
                         </Button>
-                        <Button x:Name="ImpresorasButton"
-                                Style="{StaticResource MenuButtonStyle}"
-                                Click="MenuButton_Click"
-                                Tag="Impresoras"
-                                Padding="5,10,15,10">
+                        <Button
+                            x:Name="ImpresorasButton"
+                            Padding="5,10,15,10"
+                            Click="MenuButton_Click"
+                            Style="{StaticResource MenuButtonStyle}"
+                            Tag="Impresoras">
                             <Grid>
-                                <Image Width="20"
-                                       Height="20"
-                                       HorizontalAlignment="Left"
-                                       Margin="8,0,0,0"
-                                       IsHitTestVisible="False">
+                                <Image
+                                    Width="20"
+                                    Height="20"
+                                    Margin="8,0,0,0"
+                                    HorizontalAlignment="Left"
+                                    IsHitTestVisible="False">
                                     <Image.Source>
-                                        <BitmapImage UriSource="pack://application:,,,/Resources/printer.png"/>
+                                        <BitmapImage UriSource="pack://application:,,,/Resources/printer.png" />
                                     </Image.Source>
                                 </Image>
-                                <TextBlock Text="Impresoras"
-                                           Padding="35,0,0,0"
-                                           VerticalAlignment="Center"
-                                           FontSize="16"
-                                           Foreground="Black"/>
+                                <TextBlock
+                                    Padding="35,0,0,0"
+                                    VerticalAlignment="Center"
+                                    FontSize="17"
+                                    Foreground="Black"
+                                    Text="Impresoras" />
                             </Grid>
                         </Button>
-                        <Button x:Name="OtrosButton"
-                                Style="{StaticResource MenuButtonStyle}"
-                                Click="MenuButton_Click"
-                                Tag="Otros"
-                                Padding="5,10,15,10">
+                        <Button
+                            x:Name="TrasaccionesButton"
+                            Padding="5,10,15,10"
+                            Click="MenuButton_Click"
+                            Style="{StaticResource MenuButtonStyle}"
+                            Tag="Transacciones">
                             <Grid>
-                                <Image Width="20"
-                                       Height="20"
-                                       HorizontalAlignment="Left"
-                                       Margin="8,0,0,0"
-                                       IsHitTestVisible="False">
+                                <Image
+                                    Width="20"
+                                    Height="20"
+                                    Margin="8,0,0,0"
+                                    HorizontalAlignment="Left"
+                                    IsHitTestVisible="False">
                                     <Image.Source>
-                                        <BitmapImage UriSource="pack://application:,,,/Resources/hand.png"/>
+                                        <BitmapImage UriSource="pack://application:,,,/Resources/sales.png" />
                                     </Image.Source>
                                 </Image>
-                                <TextBlock Text="Otros"
-                                           Padding="35,0,0,0"
-                                           VerticalAlignment="Center"
-                                           FontSize="16"
-                                           Foreground="Black"/>
+                                <TextBlock
+                                    Padding="35,0,0,0"
+                                    VerticalAlignment="Center"
+                                    FontSize="17"
+                                    Foreground="Black"
+                                    Text="Transacciones" />
+                            </Grid>
+                        </Button>
+                        <Button
+                            x:Name="UsuariosButton"
+                            Padding="5,10,15,10"
+                            Click="MenuButton_Click"
+                            Style="{StaticResource MenuButtonStyle}"
+                            Tag="Usuarios">
+                            <Grid>
+                                <Image
+                                    Width="20"
+                                    Height="20"
+                                    Margin="8,0,0,0"
+                                    HorizontalAlignment="Left"
+                                    IsHitTestVisible="False">
+                                    <Image.Source>
+                                        <BitmapImage UriSource="pack://application:,,,/Resources/hand.png" />
+                                    </Image.Source>
+                                </Image>
+                                <TextBlock
+                                    Padding="35,0,0,0"
+                                    VerticalAlignment="Center"
+                                    FontSize="17"
+                                    Foreground="Black"
+                                    Text="Usuarios" />
+                            </Grid>
+                        </Button>
+                        <Button
+                            x:Name="OtrosButton"
+                            Padding="5,10,15,10"
+                            Click="MenuButton_Click"
+                            MouseEnter="OtrosButton_MouseEnter"
+                            Style="{StaticResource MenuButtonStyle}"
+                            Tag="Otros">
+                            <Button.ContextMenu>
+                                <ContextMenu Placement="Bottom" StaysOpen="False">
+                                    <MenuItem Click="LogoutButton_Click" Header="Cerrar sesión" />
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                            <Grid>
+                                <Image
+                                    Width="20"
+                                    Height="20"
+                                    Margin="8,0,0,0"
+                                    HorizontalAlignment="Left"
+                                    IsHitTestVisible="False">
+                                    <Image.Source>
+                                        <BitmapImage UriSource="pack://application:,,,/Resources/hand.png" />
+                                    </Image.Source>
+                                </Image>
+                                <TextBlock
+                                    Padding="35,0,0,0"
+                                    VerticalAlignment="Center"
+                                    FontSize="17"
+                                    Foreground="Black"
+                                    Text="Otros" />
                             </Grid>
                         </Button>
                     </StackPanel>
                 </Grid>
             </Border>
-            <Border Grid.Row="3" 
-                    Background="White" 
-                    CornerRadius="20,20,20,20"
-                    BorderBrush="#E0E0E0"
-                    BorderThickness="1,0,1,1">
+            <Border
+                Grid.Row="3"
+                Background="White"
+                BorderBrush="#E0E0E0"
+                BorderThickness="1,0,1,1"
+                CornerRadius="20,20,20,20">
                 <Grid>
-                    <Grid x:Name="Tab1Content" 
-                          Visibility="Collapsed">
+                    <Grid x:Name="Tab1Content" Visibility="Visible">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
 
-                        <Grid Grid.Row="0"
-                              Margin="0,10,10,10">
+                        <Grid Grid.Row="0" Margin="0,10,10,10">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="Lista de Empleados"
-                                       FontSize="26"
-                                       FontWeight="Bold"
-                                       Margin="20,0"
-                                       Foreground="#333333"/>
-                            <Border Grid.Column="1"
-                                    Height="40"
-                                    Margin="50,0,10,0"
-                                    HorizontalAlignment="Stretch"
-                                    CornerRadius="10"
-                                    Background="#D9D9D9"
-                                    Padding="3">
+                            <TextBlock
+                                Margin="20,0"
+                                FontSize="26"
+                                FontWeight="Bold"
+                                Foreground="#333333"
+                                Text="Lista de Empleados" />
+                            <Border
+                                Grid.Column="1"
+                                Height="40"
+                                Margin="50,0,10,0"
+                                Padding="3"
+                                HorizontalAlignment="Stretch"
+                                Background="#D9D9D9"
+                                CornerRadius="10">
                                 <Grid>
-                                    <TextBox x:Name="EmployeesSearchTextBox" 
-                                             Padding="5,0,35,0"
-                                             VerticalContentAlignment="Center"
-                                             HorizontalAlignment="Stretch"
-                                             BorderThickness="0"
-                                             Background="Transparent"
-                                             FontSize="16"/>
-                                    <TextBlock Text="Buscar"
-                                               Padding="5,0,35,0"
-                                               VerticalAlignment="Center"
-                                               FontSize="16"
-                                               Foreground="#808080"
-                                               IsHitTestVisible="False">
+                                    <TextBox
+                                        x:Name="EmployeesSearchTextBox"
+                                        Padding="5,0,35,0"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalContentAlignment="Center"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        FontSize="16"
+                                        TextChanged="EmployeesSearchTextBox_TextChanged" />
+                                    <TextBlock
+                                        Padding="5,0,35,0"
+                                        VerticalAlignment="Center"
+                                        FontSize="16"
+                                        Foreground="#808080"
+                                        IsHitTestVisible="False"
+                                        Text="Buscar">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
-                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Setter Property="Visibility" Value="Collapsed" />
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding Text, ElementName=EmployeesSearchTextBox}" Value="">
-                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                        <Setter Property="Visibility" Value="Visible" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </TextBlock.Style>
                                     </TextBlock>
-                                    <TextBlock Text="🔍"
-                                               FontSize="18"
-                                               HorizontalAlignment="Right"
-                                               VerticalAlignment="Center"
-                                               Margin="10,0,0,0"
-                                               Foreground="#808080"
-                                               IsHitTestVisible="False"/>
+                                    <TextBlock
+                                        Margin="10,0,0,0"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        FontSize="18"
+                                        Foreground="#808080"
+                                        IsHitTestVisible="False"
+                                        Text="🔍" />
                                 </Grid>
                             </Border>
+                            <Button
+                                Grid.Column="2"
+                                Width="40"
+                                Height="40"
+                                Margin="0,0,10,0"
+                                Background="#D9D9D9"
+                                BorderThickness="0"
+                                Click="ReloadUsersButton_Click"
+                                Content="↻"
+                                Cursor="Hand"
+                                FontSize="18"
+                                ToolTip="Recargar empleados" />
                         </Grid>
-                        <TextBlock Grid.Row="1"
-                                   Text="Personal registrado en el sistema"
-                                   Margin="20,0,0,0"
-                                   FontSize="20"
-                                   Foreground="#333333"/>
+                        <TextBlock
+                            Grid.Row="1"
+                            Margin="20,0,0,0"
+                            FontSize="20"
+                            Foreground="#333333"
+                            Text="Personal registrado en el sistema" />
 
-                        <Border Grid.Row="2"
-                                Background="#F9F9F9"
-                                Margin="20,10"
-                                CornerRadius="5"
-                                Padding="10">
-                            <DataGrid x:Name="EmployeesDataGrid"
-                                      AutoGenerateColumns="False"
-                                      ItemsSource="{Binding Users}"
-                                      IsReadOnly="True"
-                                      HeadersVisibility="Column"
-                                      CanUserReorderColumns="False"
-                                      CanUserResizeColumns="False"
-                                      AlternatingRowBackground="#FFF7F7F7"
-                                      RowBackground="White"
-                                      GridLinesVisibility="None"
-                                      BorderThickness="0"
-                                      Margin="0"
-                                      HorizontalAlignment="Stretch"
-                                      VerticalAlignment="Stretch"
-                                      FontSize="20"
-                                      FontWeight="DemiBold">
+                        <Border
+                            Grid.Row="2"
+                            Margin="20,10"
+                            Padding="10"
+                            Background="#F9F9F9"
+                            CornerRadius="5">
+                            <DataGrid
+                                x:Name="EmployeesDataGrid"
+                                Margin="0"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                AlternatingRowBackground="#FFF7F7F7"
+                                AutoGenerateColumns="False"
+                                BorderThickness="0"
+                                CanUserReorderColumns="False"
+                                CanUserResizeColumns="False"
+                                FontSize="20"
+                                FontWeight="DemiBold"
+                                GridLinesVisibility="None"
+                                HeadersVisibility="Column"
+                                IsReadOnly="True"
+                                ItemsSource="{Binding Users}"
+                                RowBackground="White"
+                                SelectionChanged="EmployeesDataGrid_SelectionChanged">
                                 <DataGrid.RowStyle>
                                     <Style TargetType="DataGridRow">
-                                        <Setter Property="BorderThickness" Value="0,0,0,1"/>
-                                        <Setter Property="BorderBrush" Value="Black"/>
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="Foreground" Value="Black"/>
-                                        <Setter Property="OverridesDefaultStyle" Value="False"/>
+                                        <Setter Property="BorderThickness" Value="0,0,0,1" />
+                                        <Setter Property="BorderBrush" Value="Black" />
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="Foreground" Value="Black" />
+                                        <Setter Property="OverridesDefaultStyle" Value="False" />
                                         <Style.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Background" Value="Transparent" />
                                             </Trigger>
                                             <Trigger Property="IsSelected" Value="True">
-                                                <Setter Property="Background" Value="Transparent"/>
-                                                <Setter Property="Foreground" Value="Black"/>
+                                                <Setter Property="Background" Value="Transparent" />
+                                                <Setter Property="Foreground" Value="Black" />
                                             </Trigger>
                                         </Style.Triggers>
                                     </Style>
                                 </DataGrid.RowStyle>
                                 <DataGrid.CellStyle>
                                     <Style TargetType="DataGridCell">
-                                        <Setter Property="BorderThickness" Value="0"/>
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="Foreground" Value="Black"/>
-                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                                        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                                        <Setter Property="BorderThickness" Value="0" />
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="Foreground" Value="Black" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                         <Style.Triggers>
                                             <Trigger Property="IsSelected" Value="True">
-                                                <Setter Property="Background" Value="Transparent"/>
-                                                <Setter Property="Foreground" Value="Black"/>
-                                                <Setter Property="BorderThickness" Value="0"/>
+                                                <Setter Property="Background" Value="Transparent" />
+                                                <Setter Property="Foreground" Value="Black" />
+                                                <Setter Property="BorderThickness" Value="0" />
                                             </Trigger>
                                         </Style.Triggers>
                                     </Style>
                                 </DataGrid.CellStyle>
                                 <DataGrid.ColumnHeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
-                                        <Setter Property="BorderThickness" Value="0,0,0,1"/>
-                                        <Setter Property="BorderBrush" Value="Black"/>
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                                        <Setter Property="Margin" Value="5,5,5,5"/>
-                                        <Setter Property="FontWeight" Value="DemiBold"/>
+                                        <Setter Property="BorderThickness" Value="0,0,0,1" />
+                                        <Setter Property="BorderBrush" Value="Black" />
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="Margin" Value="5,5,5,5" />
+                                        <Setter Property="FontWeight" Value="SemiBold" />
                                         <Style.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Background" Value="Transparent" />
                                             </Trigger>
                                         </Style.Triggers>
                                     </Style>
                                 </DataGrid.ColumnHeaderStyle>
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="N. empleado" 
-                                                        Binding="{Binding IdUser}" 
-                                                        Width="*" 
-                                                        FontSize="18"
-                                                        ElementStyle="{StaticResource DataGridCellTextStyle}"/>
-                                    <DataGridTextColumn Header="Usuario" 
-                                                        Binding="{Binding Username}" 
-                                                        Width="*" 
-                                                        FontSize="18"
-                                                        ElementStyle="{StaticResource DataGridCellTextStyle}"/>
-                                    <DataGridTextColumn Header="Nombre" 
-                                                        Binding="{Binding Names}" 
-                                                        Width="*" 
-                                                        FontSize="18"
-                                                        ElementStyle="{StaticResource DataGridCellTextStyle}"/>
-                                    <DataGridTextColumn Header="Apellido" 
-                                                        Binding="{Binding Lastnames}" 
-                                                        Width="*" 
-                                                        FontSize="18"
-                                                        ElementStyle="{StaticResource DataGridCellTextStyle}"/>
-                                    <DataGridTextColumn Header="Email" 
-                                                        Binding="{Binding Email}" 
-                                                        Width="*" 
-                                                        FontSize="18"
-                                                        ElementStyle="{StaticResource DataGridCellTextStyle}"/>
-                                    <DataGridTemplateColumn Header="Rol" Width="*">
+                                    <DataGridTextColumn
+                                        Width="*"
+                                        Binding="{Binding IdUser}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        FontSize="18"
+                                        Header="N. empleado" />
+                                    <DataGridTextColumn
+                                        Width="*"
+                                        Binding="{Binding Username}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        FontSize="18"
+                                        Header="Usuario" />
+                                    <DataGridTextColumn
+                                        Width="2*"
+                                        Binding="{Binding Names}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        FontSize="18"
+                                        Header="Nombre" />
+                                    <DataGridTextColumn
+                                        Width="2*"
+                                        Binding="{Binding Lastnames}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        FontSize="18"
+                                        Header="Apellido" />
+                                    <DataGridTextColumn
+                                        Width="2*"
+                                        Binding="{Binding Email}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        FontSize="18"
+                                        Header="Email" />
+                                    <DataGridTextColumn
+                                        Width="*"
+                                        Binding="{Binding Phone}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        FontSize="18"
+                                        Header="Teléfono" />
+                                    <DataGridTemplateColumn Width="*" Header="Rol">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <Border Background="{Binding Role, Converter={StaticResource RoleToBrushConverter}}"
-                                                        CornerRadius="8"
-                                                        Padding="6,4"
+                                                <Border
+                                                    Padding="6,4"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    Background="{Binding Role, Converter={StaticResource RoleToBrushConverter}}"
+                                                    CornerRadius="8"
+                                                    SnapsToDevicePixels="True">
+                                                    <TextBlock
                                                         HorizontalAlignment="Center"
                                                         VerticalAlignment="Center"
-                                                        SnapsToDevicePixels="True">
-                                                    <TextBlock Text="{Binding Role, Converter={StaticResource RoleDisplayConverter}}"
-                                                               FontSize="18"
-                                                               FontWeight="DemiBold"
-                                                               Foreground="#111111"
-                                                               VerticalAlignment="Center"
-                                                               HorizontalAlignment="Center"/>
+                                                        FontSize="18"
+                                                        FontWeight="DemiBold"
+                                                        Foreground="#111111"
+                                                        Text="{Binding Role, Converter={StaticResource RoleDisplayConverter}}" />
                                                 </Border>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
-                                    <DataGridTemplateColumn Header="Editar" 
-                                                            Width="Auto">
+                                    <DataGridTemplateColumn Width="Auto" Header="Editar">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <Button Padding="15,5"
-                                                        Margin="5,8"
-                                                        Tag="{Binding}"
-                                                        Click="EditUser_Click"
-                                                        BorderThickness="0"
-                                                        Background="Transparent"
-                                                        HorizontalAlignment="Center"
-                                                        Cursor="Hand">
-                                                    <Image Width="20"
-                                                           Height="20"
-                                                           Stretch="Uniform"
-                                                           Source="pack://application:,,,/Resources/pencil.png"/>
+                                                <Button
+                                                    Margin="5,8"
+                                                    Padding="15,5"
+                                                    HorizontalAlignment="Center"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Click="EditUser_Click"
+                                                    Cursor="Hand"
+                                                    Tag="{Binding}">
+                                                    <Image
+                                                        Width="20"
+                                                        Height="20"
+                                                        Source="pack://application:,,,/Resources/pencil.png"
+                                                        Stretch="Uniform" />
                                                 </Button>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
@@ -450,232 +547,230 @@
                         </Border>
                     </Grid>
 
-                    <Grid x:Name="Tab2Content" 
-                          Visibility="Visible">
+                    <Grid x:Name="Tab2Content" Visibility="Collapsed">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" 
-                                   Text="Administrador de Productos"
-                                   FontSize="24"
-                                   HorizontalAlignment="Center"
-                                   FontWeight="Bold"
-                                   Margin="20,0"
-                                   Foreground="#333333"/>
-                        <TextBlock Grid.Row="1"
-                                   Margin="10,0"
-                                   Text="Gestiona el inventario productos"
-                                   HorizontalAlignment="Center"
-                                   FontSize="18"
-                                   Foreground="#333333"/>
-                        <Grid Grid.Row="2"
-                              Margin="10,10">
+                        <TextBlock
+                            Grid.Row="0"
+                            Margin="20,0"
+                            HorizontalAlignment="Center"
+                            FontSize="24"
+                            FontWeight="Bold"
+                            Foreground="#333333"
+                            Text="Administrador de Productos" />
+                        <TextBlock
+                            Grid.Row="1"
+                            Margin="10,0"
+                            HorizontalAlignment="Center"
+                            FontSize="18"
+                            Foreground="#333333"
+                            Text="Gestiona el inventario productos" />
+                        <Grid Grid.Row="2" Margin="10,10">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <Button Grid.Column="1"
-                                    Margin="250,0,50,0"
-                                    HorizontalAlignment="Stretch"
-                                    Background="#D9D9D9"
-                                    Foreground="Black"
-                                    FontSize="18"
-                                    Cursor="Hand"
-                                    Click="AddProductButton_Click">
-                                <StackPanel Orientation="Horizontal" 
-                                            VerticalAlignment="Center" 
-                                            HorizontalAlignment="Center">
-                                    <Image Source="pack://application:,,,/Resources/mas.png"
-                                           Width="18" 
-                                           Height="18" 
-                                           Margin="0,0,8,0" 
-                                           IsHitTestVisible="False"/>
-                                    <TextBlock Text="Agregar Producto" 
-                                               VerticalAlignment="Center"/>
+                            <Button
+                                Grid.Column="1"
+                                Margin="250,0,50,0"
+                                HorizontalAlignment="Stretch"
+                                Background="#D9D9D9"
+                                Click="AddProductButton_Click"
+                                Cursor="Hand"
+                                FontSize="18"
+                                Foreground="Black">
+                                <StackPanel
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Orientation="Horizontal">
+                                    <Image
+                                        Width="18"
+                                        Height="18"
+                                        Margin="0,0,8,0"
+                                        IsHitTestVisible="False"
+                                        Source="pack://application:,,,/Resources/mas.png" />
+                                    <TextBlock VerticalAlignment="Center" Text="Agregar Producto" />
                                 </StackPanel>
                             </Button>
-                            <Border Grid.Column="0"
-                                    Height="40"
-                                    Margin="50,0"
-                                    HorizontalAlignment="Stretch"
-                                    CornerRadius="10"
-                                    Background="#D9D9D9"
-                                    Padding="3">
+                            <Border
+                                Grid.Column="0"
+                                Height="40"
+                                Margin="50,0"
+                                Padding="3"
+                                HorizontalAlignment="Stretch"
+                                Background="#D9D9D9"
+                                CornerRadius="10">
                                 <Grid>
-                                    <TextBox x:Name="ProductsSearchTextBox" 
-                                             Padding="5,0,35,0"
-                                             VerticalContentAlignment="Center"
-                                             HorizontalAlignment="Stretch"
-                                             BorderThickness="0"
-                                             Background="Transparent"
-                                             FontSize="16"/>
-                                    <TextBlock Text="Buscar"
-                                               Padding="5,0,35,0"
-                                               VerticalAlignment="Center"
-                                               FontSize="16"
-                                               Foreground="#808080"
-                                               IsHitTestVisible="False">
+                                    <TextBox
+                                        x:Name="ProductsSearchTextBox"
+                                        Padding="5,0,35,0"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalContentAlignment="Center"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        FontSize="16"
+                                        TextChanged="ProductsSearchTextBox_TextChanged" />
+                                    <TextBlock
+                                        Padding="5,0,35,0"
+                                        VerticalAlignment="Center"
+                                        FontSize="16"
+                                        Foreground="#808080"
+                                        IsHitTestVisible="False"
+                                        Text="Buscar">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
-                                                <Setter Property="Visibility" 
-                                                        Value="Collapsed"/>
+                                                <Setter Property="Visibility" Value="Collapsed" />
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Text, ElementName=EmployeesSearchTextBox}" Value="">
-                                                        <Setter Property="Visibility" 
-                                                                Value="Visible"/>
+                                                    <DataTrigger Binding="{Binding Text, ElementName=ProductsSearchTextBox}" Value="">
+                                                        <Setter Property="Visibility" Value="Visible" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </TextBlock.Style>
                                     </TextBlock>
-                                    <TextBlock Text="🔍"
-                                               FontSize="18"
-                                               HorizontalAlignment="Right"
-                                               VerticalAlignment="Center"
-                                               Margin="10,0,0,0"
-                                               Foreground="#808080"
-                                               IsHitTestVisible="False"/>
+                                    <TextBlock
+                                        Margin="10,0,0,0"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        FontSize="18"
+                                        Foreground="#808080"
+                                        IsHitTestVisible="False"
+                                        Text="🔍" />
                                 </Grid>
                             </Border>
+                            <Button
+                                Grid.Column="2"
+                                Width="40"
+                                Height="40"
+                                Margin="0,0,10,0"
+                                Background="#D9D9D9"
+                                BorderThickness="0"
+                                Click="ReloadProductsButton_Click"
+                                Content="↻"
+                                Cursor="Hand"
+                                FontSize="18"
+                                ToolTip="Recargar productos" />
                         </Grid>
 
-                        <Border Grid.Row="3"
-                                Background="#F9F9F9"
-                                Margin="20,10"
-                                CornerRadius="5"
-                                Padding="10">
-                            <DataGrid x:Name="ProductsDataGrid"
-                                      AutoGenerateColumns="False"
-                                      ItemsSource="{Binding Products}"
-                                      IsReadOnly="True"
-                                      HeadersVisibility="Column"
-                                      CanUserReorderColumns="False"
-                                      CanUserResizeColumns="False"
-                                      AlternatingRowBackground="#FFF7F7F7"
-                                      RowBackground="White"
-                                      GridLinesVisibility="None"
-                                      BorderThickness="0"
-                                      Margin="0"
-                                      HorizontalAlignment="Stretch"
-                                      VerticalAlignment="Stretch"
-                                      FontSize="20"
-                                      FontWeight="DemiBold">
+                        <Border
+                            Grid.Row="3"
+                            Margin="20,10"
+                            Padding="10"
+                            Background="#F9F9F9"
+                            CornerRadius="5">
+                            <DataGrid
+                                x:Name="ProductsDataGrid"
+                                Margin="0"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                AlternatingRowBackground="#FFF7F7F7"
+                                AutoGenerateColumns="False"
+                                BorderThickness="0"
+                                CanUserReorderColumns="False"
+                                CanUserResizeColumns="False"
+                                FontSize="20"
+                                FontWeight="DemiBold"
+                                GridLinesVisibility="None"
+                                HeadersVisibility="Column"
+                                IsReadOnly="True"
+                                ItemsSource="{Binding Products}"
+                                RowBackground="White">
                                 <DataGrid.RowStyle>
                                     <Style TargetType="DataGridRow">
-                                        <Setter Property="BorderThickness" 
-                                                Value="0,0,0,1"/>
-                                        <Setter Property="BorderBrush" 
-                                                Value="Black"/>
-                                        <Setter Property="Background" 
-                                                Value="Transparent"/>
-                                        <Setter Property="Foreground" 
-                                                Value="Black"/>
-                                        <Setter Property="OverridesDefaultStyle" 
-                                                Value="False"/>
+                                        <Setter Property="BorderThickness" Value="0,0,0,1" />
+                                        <Setter Property="BorderBrush" Value="Black" />
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="Foreground" Value="Black" />
+                                        <Setter Property="OverridesDefaultStyle" Value="False" />
                                         <Style.Triggers>
-                                            <Trigger Property="IsMouseOver" 
-                                                     Value="True">
-                                                <Setter Property="Background" 
-                                                        Value="Transparent"/>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="Transparent" />
                                             </Trigger>
-                                            <Trigger Property="IsSelected" 
-                                                     Value="True">
-                                                <Setter Property="Background" 
-                                                        Value="Transparent"/>
-                                                <Setter Property="Foreground" 
-                                                        Value="Black"/>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="Background" Value="Transparent" />
+                                                <Setter Property="Foreground" Value="Black" />
                                             </Trigger>
                                         </Style.Triggers>
                                     </Style>
                                 </DataGrid.RowStyle>
                                 <DataGrid.CellStyle>
                                     <Style TargetType="DataGridCell">
-                                        <Setter Property="BorderThickness" 
-                                                Value="0"/>
-                                        <Setter Property="Background" 
-                                                Value="Transparent"/>
-                                        <Setter Property="Foreground" 
-                                                Value="Black"/>
-                                        <Setter Property="HorizontalContentAlignment" 
-                                                Value="Center"/>
-                                        <Setter Property="FocusVisualStyle" 
-                                                Value="{x:Null}"/>
+                                        <Setter Property="BorderThickness" Value="0" />
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="Foreground" Value="Black" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                         <Style.Triggers>
-                                            <Trigger Property="IsSelected" 
-                                                     Value="True">
-                                                <Setter Property="Background" 
-                                                        Value="Transparent"/>
-                                                <Setter Property="Foreground" 
-                                                        Value="Black"/>
-                                                <Setter Property="BorderThickness" 
-                                                        Value="0"/>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="Background" Value="Transparent" />
+                                                <Setter Property="Foreground" Value="Black" />
+                                                <Setter Property="BorderThickness" Value="0" />
                                             </Trigger>
                                         </Style.Triggers>
                                     </Style>
                                 </DataGrid.CellStyle>
                                 <DataGrid.ColumnHeaderStyle>
                                     <Style TargetType="DataGridColumnHeader">
-                                        <Setter Property="BorderThickness" 
-                                                Value="0,0,0,1"/>
-                                        <Setter Property="BorderBrush" 
-                                                Value="Black"/>
-                                        <Setter Property="Background" 
-                                                Value="Transparent"/>
-                                        <Setter Property="HorizontalContentAlignment" 
-                                                Value="Center"/>
-                                        <Setter Property="Margin" 
-                                                Value="5,5,5,5"/>
-                                        <Setter Property="FontWeight" 
-                                                Value="DemiBold"/>
+                                        <Setter Property="BorderThickness" Value="0,0,0,1" />
+                                        <Setter Property="BorderBrush" Value="Black" />
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="Margin" Value="5,5,5,5" />
+                                        <Setter Property="FontWeight" Value="DemiBold" />
                                         <Style.Triggers>
-                                            <Trigger Property="IsMouseOver" 
-                                                     Value="True">
-                                                <Setter Property="Background" 
-                                                        Value="Transparent"/>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="Transparent" />
                                             </Trigger>
                                         </Style.Triggers>
                                     </Style>
                                 </DataGrid.ColumnHeaderStyle>
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Producto"
-                                                        Binding="{Binding Item.Name}"
-                                                        Width="*"
-                                                        FontSize="18"
-                                                        ElementStyle="{StaticResource DataGridCellTextStyle}"/>
-                                    <DataGridTextColumn Header="Categoria"
-                                                        Binding="{Binding Item.Category}"
-                                                        Width="*"
-                                                        FontSize="18"
-                                                        ElementStyle="{StaticResource DataGridCellTextStyle}"/>
-                                    <DataGridTextColumn Header="Precio"
-                                                        Binding="{Binding Price, StringFormat=C}"
-                                                        Width="*"
-                                                        FontSize="18"
-                                                        ElementStyle="{StaticResource DataGridCellTextStyle}"/>
-                                    <DataGridTextColumn Header="Disponibilidad"
-                                                        Binding="{Binding Item.Available}"
-                                                        Width="*"
-                                                        FontSize="18"
-                                                        ElementStyle="{StaticResource DataGridCellTextStyle}"/>
-                                    <DataGridTemplateColumn Header="Editar" 
-                                                            Width="Auto">
+                                    <DataGridTextColumn
+                                        Width="*"
+                                        Binding="{Binding Item.Name}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        FontSize="18"
+                                        Header="Producto" />
+                                    <DataGridTextColumn
+                                        Width="*"
+                                        Binding="{Binding Item.Category}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        FontSize="18"
+                                        Header="Categoria" />
+                                    <DataGridTextColumn
+                                        Width="*"
+                                        Binding="{Binding Price, StringFormat=C}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        FontSize="18"
+                                        Header="Precio" />
+                                    <DataGridTextColumn
+                                        Width="*"
+                                        Binding="{Binding Item.Available, Converter={StaticResource BoolSiNoConverter}}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        FontSize="18"
+                                        Header="Disponibilidad" />
+                                    <DataGridTemplateColumn Width="Auto" Header="Editar">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <Button Padding="15,5"
-                                                        Margin="5,8"
-                                                        Tag="{Binding}"
-                                                        Click="EditProduct_Click"
-                                                        BorderThickness="0"
-                                                        Background="Transparent"
-                                                        HorizontalAlignment="Center"
-                                                        Cursor="Hand">
-                                                    <Image Width="20"
-                                                           Height="20"
-                                                           Stretch="Uniform"
-                                                           Source="pack://application:,,,/Resources/pencil.png"/>
+                                                <Button
+                                                    Margin="5,8"
+                                                    Padding="15,5"
+                                                    HorizontalAlignment="Center"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Click="EditProduct_Click"
+                                                    Cursor="Hand"
+                                                    Tag="{Binding}">
+                                                    <Image
+                                                        Width="20"
+                                                        Height="20"
+                                                        Source="pack://application:,,,/Resources/pencil.png"
+                                                        Stretch="Uniform" />
                                                 </Button>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
@@ -685,48 +780,788 @@
                         </Border>
                     </Grid>
 
-                    <!-- Tab 3: Estadísticas -->
-                    <Grid x:Name="Tab3Content" 
-                          Visibility="Collapsed">
+                    <Grid x:Name="Tab3Content" Visibility="Collapsed">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0"
-                                   Text="📊 Estadísticas"
-                                   FontSize="24"
-                                   FontWeight="Bold"
-                                   Margin="20"
-                                   Foreground="#333333"/>
-                        <Border Grid.Row="1" 
-                                Background="#F9F9F9"
-                                Margin="20"
-                                CornerRadius="5"
-                                Padding="20">
-                            <StackPanel>
-                                <TextBlock Text="Aquí irán las estadísticas y gráficos"
-                                           FontSize="16"
-                                           Foreground="#666666"/>
-                                <TextBlock Text="• Gráficos de datos"
-                                           FontSize="14"
-                                           Foreground="#888888"
-                                           Margin="0,10,0,0"/>
-                                <TextBlock Text="• Métricas importantes"
-                                           FontSize="14"
-                                           Foreground="#888888"/>
-                                <TextBlock Text="• Análisis de tendencias"
-                                           FontSize="14"
-                                           Foreground="#888888"/>
-                            </StackPanel>
+                        <TextBlock
+                            Grid.Row="0"
+                            Margin="20,0"
+                            HorizontalAlignment="Center"
+                            FontSize="24"
+                            FontWeight="Bold"
+                            Foreground="#333333"
+                            Text="Administrador de impresoras" />
+                        <Grid Grid.Row="1" Margin="10,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Button
+                                Grid.Column="1"
+                                Margin="250,0,50,0"
+                                HorizontalAlignment="Stretch"
+                                Background="#D9D9D9"
+                                Click="OpenCreatePrinterWindow_Click"
+                                Cursor="Hand"
+                                FontSize="18"
+                                Foreground="Black">
+                                <StackPanel
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Orientation="Horizontal">
+                                    <Image
+                                        Width="18"
+                                        Height="18"
+                                        Margin="0,0,8,0"
+                                        IsHitTestVisible="False"
+                                        Source="pack://application:,,,/Resources/mas.png" />
+                                    <TextBlock VerticalAlignment="Center" Text="Agregar Impresora" />
+                                </StackPanel>
+                            </Button>
+                            <Border
+                                Grid.Column="0"
+                                Height="40"
+                                Margin="50,0"
+                                Padding="3"
+                                HorizontalAlignment="Stretch"
+                                Background="#D9D9D9"
+                                CornerRadius="10">
+                                <Grid>
+                                    <TextBox
+                                        x:Name="PrintersSearchTextBox"
+                                        Padding="5,0,35,0"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalContentAlignment="Center"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        FontSize="16"
+                                        TextChanged="PrintersSearchTextBox_TextChanged" />
+                                    <TextBlock
+                                        Padding="5,0,35,0"
+                                        VerticalAlignment="Center"
+                                        FontSize="16"
+                                        Foreground="#808080"
+                                        IsHitTestVisible="False"
+                                        Text="Buscar">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Text, ElementName=PrintersSearchTextBox}" Value="">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <TextBlock
+                                        Margin="10,0,0,0"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        FontSize="18"
+                                        Foreground="#808080"
+                                        IsHitTestVisible="False"
+                                        Text="🔍" />
+                                </Grid>
+                            </Border>
+                            <Button
+                                Grid.Column="2"
+                                Width="40"
+                                Height="40"
+                                Margin="0,0,10,0"
+                                Background="#D9D9D9"
+                                BorderThickness="0"
+                                Click="ReloadPrintersButton_Click"
+                                Content="↻"
+                                Cursor="Hand"
+                                FontSize="18"
+                                ToolTip="Recargar impresoras" />
+                        </Grid>
+
+                        <Border
+                            Grid.Row="2"
+                            Margin="20"
+                            Padding="10"
+                            Background="#F9F9F9"
+                            CornerRadius="5">
+                            <DataGrid
+                                x:Name="PrintersDataGrid"
+                                Margin="0"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                AlternatingRowBackground="#FFF7F7F7"
+                                AutoGenerateColumns="False"
+                                BorderThickness="0"
+                                CanUserReorderColumns="False"
+                                CanUserResizeColumns="False"
+                                FontSize="20"
+                                FontWeight="DemiBold"
+                                GridLinesVisibility="None"
+                                HeadersVisibility="Column"
+                                IsReadOnly="True"
+                                ItemsSource="{Binding Printers}"
+                                RowBackground="White">
+                                <DataGrid.RowStyle>
+                                    <Style TargetType="DataGridRow">
+                                        <Setter Property="BorderThickness" Value="0,0,0,1" />
+                                        <Setter Property="BorderBrush" Value="Black" />
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="Foreground" Value="Black" />
+                                        <Setter Property="OverridesDefaultStyle" Value="False" />
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="Transparent" />
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="Background" Value="Transparent" />
+                                                <Setter Property="Foreground" Value="Black" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGrid.RowStyle>
+                                <DataGrid.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <Setter Property="BorderThickness" Value="0" />
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="Foreground" Value="Black" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                        <Style.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="Background" Value="Transparent" />
+                                                <Setter Property="Foreground" Value="Black" />
+                                                <Setter Property="BorderThickness" Value="0" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGrid.CellStyle>
+                                <DataGrid.ColumnHeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="BorderThickness" Value="0,0,0,1" />
+                                        <Setter Property="BorderBrush" Value="Black" />
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="Margin" Value="5,5,5,5" />
+                                        <Setter Property="FontWeight" Value="DemiBold" />
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="Transparent" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn
+                                        Width="*"
+                                        Binding="{Binding Name, TargetNullValue='No aplica'}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        Header="Nombre" />
+                                    <DataGridTextColumn
+                                        Width="*"
+                                        Binding="{Binding ConnectionType, Converter={StaticResource ConnectionTypeDisplayConverter}, TargetNullValue='No aplica'}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        Header="Tipo" />
+                                    <DataGridTextColumn
+                                        Width="*"
+                                        Binding="{Binding PortName, TargetNullValue='No aplica'}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        Header="Puerto" />
+                                    <DataGridTextColumn
+                                        Width="*"
+                                        Binding="{Binding Model, TargetNullValue='No aplica'}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        Header="Modelo" />
+                                    <DataGridTextColumn
+                                        Width="*"
+                                        Binding="{Binding Status, Converter={StaticResource StatusDisplayConverter}, TargetNullValue='No aplica'}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        Header="Estado" />
+                                    <DataGridTemplateColumn Width="Auto" Header="Eliminar">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button
+                                                    Margin="5,8"
+                                                    Padding="15,5"
+                                                    HorizontalAlignment="Center"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Click="DeletePrinter_Click"
+                                                    Cursor="Hand"
+                                                    Tag="{Binding}">
+                                                    <Image
+                                                        Width="20"
+                                                        Height="20"
+                                                        Source="pack://application:,,,/Resources/trash.png"
+                                                        Stretch="Uniform" />
+                                                </Button>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Border>
+                    </Grid>
+
+                    <Grid x:Name="Tab4Content" Visibility="Collapsed">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <TextBlock
+                            Grid.Row="0"
+                            Margin="20,0"
+                            HorizontalAlignment="Center"
+                            FontSize="24"
+                            FontWeight="Bold"
+                            Foreground="#333333"
+                            Text="Registro de Transacciones" />
+                        <TextBlock
+                            Grid.Row="1"
+                            Margin="10,0"
+                            HorizontalAlignment="Center"
+                            FontSize="18"
+                            Foreground="#333333"
+                            Text="Listado de transacciones registradas" />
+
+                        <Grid Grid.Row="2" Margin="10,10">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Grid Grid.Row="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <Border
+                                    Grid.Column="0"
+                                    Height="40"
+                                    Margin="50,0,10,0"
+                                    Padding="3"
+                                    HorizontalAlignment="Stretch"
+                                    Background="#D9D9D9"
+                                    CornerRadius="10">
+                                    <Grid>
+                                        <TextBox
+                                            x:Name="TransactionsSearchTextBox"
+                                            Padding="5,0,35,0"
+                                            HorizontalAlignment="Stretch"
+                                            VerticalContentAlignment="Center"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            FontSize="16"
+                                            TextChanged="TransactionsSearchTextBox_TextChanged" />
+                                        <TextBlock
+                                            Padding="5,0,35,0"
+                                            VerticalAlignment="Center"
+                                            FontSize="16"
+                                            Foreground="#808080"
+                                            IsHitTestVisible="False"
+                                            Text="Buscar">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Text, ElementName=TransactionsSearchTextBox}" Value="">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <TextBlock
+                                            Margin="10,0,0,0"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Center"
+                                            FontSize="18"
+                                            Foreground="#808080"
+                                            IsHitTestVisible="False"
+                                            Text="🔍" />
+                                    </Grid>
+                                </Border>
+
+                                <Border
+                                    Grid.Column="1"
+                                    Height="40"
+                                    Margin="10,0"
+                                    Padding="6,3"
+                                    HorizontalAlignment="Stretch"
+                                    Background="#D9D9D9"
+                                    CornerRadius="10">
+                                    <ComboBox
+                                        x:Name="TransactionsTypeFilterComboBox"
+                                        VerticalContentAlignment="Center"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        FontSize="15"
+                                        SelectionChanged="TransactionsFilter_SelectionChanged">
+                                        <ComboBoxItem
+                                            Content="Todos los tipos"
+                                            IsSelected="True"
+                                            Tag="" />
+                                        <ComboBoxItem Content="Compra" Tag="compra" />
+                                        <ComboBoxItem Content="Venta" Tag="venta" />
+                                    </ComboBox>
+                                </Border>
+
+                                <Border
+                                    Grid.Column="2"
+                                    Height="40"
+                                    Margin="10,0"
+                                    Padding="6,3"
+                                    HorizontalAlignment="Stretch"
+                                    Background="#D9D9D9"
+                                    CornerRadius="10">
+                                    <ComboBox
+                                        x:Name="TransactionsStatusFilterComboBox"
+                                        VerticalContentAlignment="Center"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        FontSize="15"
+                                        SelectionChanged="TransactionsFilter_SelectionChanged">
+                                        <ComboBoxItem
+                                            Content="Todos los estados"
+                                            IsSelected="True"
+                                            Tag="" />
+                                        <ComboBoxItem Content="Pendiente" Tag="pending" />
+                                        <ComboBoxItem Content="Completada" Tag="completed" />
+                                    </ComboBox>
+                                </Border>
+                                <Border
+                                    Grid.Column="3"
+                                    Height="40"
+                                    Margin="10,0"
+                                    Padding="6,3"
+                                    HorizontalAlignment="Stretch"
+                                    Background="#D9D9D9"
+                                    CornerRadius="10">
+                                    <ComboBox
+                                        x:Name="TransactionsProductTypeFilterComboBox"
+                                        VerticalContentAlignment="Center"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        FontSize="15"
+                                        SelectionChanged="TransactionsFilter_SelectionChanged">
+                                        <ComboBoxItem
+                                            Content="Todos los productos"
+                                            IsSelected="True"
+                                            Tag="" />
+                                        <ComboBoxItem Content="Producto" Tag="item" />
+                                        <ComboBoxItem Content="Impresión" Tag="print" />
+                                        <ComboBoxItem Content="Servcio especial" Tag="special_service" />
+                                    </ComboBox>
+                                </Border>
+
+                                <Border
+                                    Grid.Column="4"
+                                    Height="36"
+                                    Margin="10,0"
+                                    Padding="6,2"
+                                    Background="#D9D9D9"
+                                    CornerRadius="10">
+                                    <ComboBox
+                                        x:Name="TransactionsDateFilterModeComboBox"
+                                        VerticalContentAlignment="Center"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        FontSize="15"
+                                        SelectionChanged="TransactionsDateFilterMode_SelectionChanged">
+                                        <ComboBoxItem
+                                            Content="Sin filtro de fecha"
+                                            IsSelected="True"
+                                            Tag="none" />
+                                        <ComboBoxItem Content="Antes de" Tag="before" />
+                                        <ComboBoxItem Content="Despues de" Tag="after" />
+                                        <ComboBoxItem Content="Rango" Tag="range" />
+                                    </ComboBox>
+                                </Border>
+
+                                <DatePicker
+                                    x:Name="TransactionsDateFromPicker"
+                                    Grid.Column="5"
+                                    Height="36"
+                                    Margin="0,0,10,0"
+                                    FontSize="14"
+                                    SelectedDateChanged="TransactionsDatePicker_SelectedDateChanged" />
+
+                                <DatePicker
+                                    x:Name="TransactionsDateToPicker"
+                                    Grid.Column="6"
+                                    Height="36"
+                                    FontSize="14"
+                                    SelectedDateChanged="TransactionsDatePicker_SelectedDateChanged"
+                                    Visibility="Collapsed" />
+
+                                <Button
+                                    Grid.Column="7"
+                                    Width="40"
+                                    Height="40"
+                                    Margin="10,0,8,0"
+                                    Background="#D9D9D9"
+                                    BorderThickness="0"
+                                    Click="OpenTransactionSearchConfig_Click"
+                                    Content="⚙"
+                                    Cursor="Hand"
+                                    FontSize="18"
+                                    ToolTip="Configurar busqueda por columna" />
+
+                                <Button
+                                    Grid.Column="8"
+                                    Width="40"
+                                    Height="40"
+                                    Margin="0,0,50,0"
+                                    Background="#D9D9D9"
+                                    BorderThickness="0"
+                                    Click="ReloadTransactionsButton_Click"
+                                    Content="↻"
+                                    Cursor="Hand"
+                                    FontSize="18"
+                                    ToolTip="Recargar transacciones" />
+                            </Grid>
+
+                        </Grid>
+
+                        <Border
+                            Grid.Row="3"
+                            Margin="20,10"
+                            Padding="10"
+                            Background="#F9F9F9"
+                            CornerRadius="5">
+                            <DataGrid
+                                x:Name="TransactionsDataGrid"
+                                Margin="0"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                AlternatingRowBackground="#FFF7F7F7"
+                                AutoGenerateColumns="False"
+                                BorderThickness="0"
+                                CanUserReorderColumns="False"
+                                CanUserResizeColumns="False"
+                                FontSize="20"
+                                FontWeight="DemiBold"
+                                GridLinesVisibility="None"
+                                HeadersVisibility="Column"
+                                IsReadOnly="True"
+                                ItemsSource="{Binding Transactions}"
+                                PreviewMouseLeftButtonUp="TransactionsDataGrid_PreviewMouseLeftButtonUp"
+                                RowBackground="White">
+                                <DataGrid.RowStyle>
+                                    <Style TargetType="DataGridRow">
+                                        <Setter Property="BorderThickness" Value="0,0,0,1" />
+                                        <Setter Property="BorderBrush" Value="Black" />
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="Foreground" Value="Black" />
+                                        <Setter Property="OverridesDefaultStyle" Value="False" />
+                                    </Style>
+                                </DataGrid.RowStyle>
+                                <DataGrid.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <Setter Property="BorderThickness" Value="0" />
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="Foreground" Value="Black" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                    </Style>
+                                </DataGrid.CellStyle>
+                                <DataGrid.ColumnHeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="BorderThickness" Value="0,0,0,1" />
+                                        <Setter Property="BorderBrush" Value="Black" />
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="Margin" Value="5,5,5,5" />
+                                        <Setter Property="FontWeight" Value="DemiBold" />
+                                    </Style>
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn
+                                        Width="*"
+                                        Binding="{Binding IdTransaction}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        Header="ID" />
+                                    <DataGridTextColumn
+                                        Width="*"
+                                        Binding="{Binding Type}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        Header="Tipo" />
+                                    <DataGridTextColumn
+                                        Width="*"
+                                        Binding="{Binding Date, StringFormat=G}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        Header="Fecha" />
+                                    <DataGridTextColumn
+                                        Width="*"
+                                        Binding="{Binding User.Username, TargetNullValue='No aplica'}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        Header="Usuario" />
+                                    <DataGridTextColumn
+                                        Width="*"
+                                        Binding="{Binding Total, StringFormat=C}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        Header="Total" />
+                                    <DataGridTextColumn
+                                        Width="*"
+                                        Binding="{Binding Status, Converter={StaticResource StatusDisplayConverter}}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        Header="Estado" />
+                                    <DataGridTextColumn
+                                        Width="*"
+                                        Binding="{Binding PaymentMethod, Converter={StaticResource PaymentMethodDisplayConverter}, TargetNullValue='No aplica'}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        Header="Metodo pago" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Border>
+                    </Grid>
+
+                    <Grid x:Name="Tab5Content" Visibility="Collapsed">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0" Margin="0,10,10,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                Margin="20,0"
+                                FontSize="26"
+                                FontWeight="Bold"
+                                Foreground="#333333"
+                                Text="Lista de Usuarios" />
+                            <Border
+                                Grid.Column="1"
+                                Height="40"
+                                Margin="50,0,10,0"
+                                Padding="3"
+                                HorizontalAlignment="Stretch"
+                                Background="#D9D9D9"
+                                CornerRadius="10">
+                                <Grid>
+                                    <TextBox
+                                        x:Name="OtherUsersSearchTextBox"
+                                        Padding="5,0,35,0"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalContentAlignment="Center"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        FontSize="16"
+                                        TextChanged="OtherUsersSearchTextBox_TextChanged" />
+                                    <TextBlock
+                                        Padding="5,0,35,0"
+                                        VerticalAlignment="Center"
+                                        FontSize="16"
+                                        Foreground="#808080"
+                                        IsHitTestVisible="False"
+                                        Text="Buscar">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Text, ElementName=OtherUsersSearchTextBox}" Value="">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <TextBlock
+                                        Margin="10,0,0,0"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        FontSize="18"
+                                        Foreground="#808080"
+                                        IsHitTestVisible="False"
+                                        Text="🔍" />
+                                </Grid>
+                            </Border>
+                            <Button
+                                Grid.Column="2"
+                                Width="40"
+                                Height="40"
+                                Margin="0,0,10,0"
+                                Background="#D9D9D9"
+                                BorderThickness="0"
+                                Click="ReloadOtherUsersButton_Click"
+                                Content="↻"
+                                Cursor="Hand"
+                                FontSize="18"
+                                ToolTip="Recargar usuarios" />
+                        </Grid>
+                        <TextBlock
+                            Grid.Row="1"
+                            Margin="20,0,0,0"
+                            FontSize="20"
+                            Foreground="#333333"
+                            Text="Usuarios con otros roles" />
+
+                        <Border
+                            Grid.Row="2"
+                            Margin="20,10"
+                            Padding="10"
+                            Background="#F9F9F9"
+                            CornerRadius="5">
+                            <DataGrid
+                                x:Name="OtherUsersDataGrid"
+                                Margin="0"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                AlternatingRowBackground="#FFF7F7F7"
+                                AutoGenerateColumns="False"
+                                BorderThickness="0"
+                                CanUserReorderColumns="False"
+                                CanUserResizeColumns="False"
+                                FontSize="20"
+                                FontWeight="DemiBold"
+                                GridLinesVisibility="None"
+                                HeadersVisibility="Column"
+                                IsReadOnly="True"
+                                ItemsSource="{Binding OtherUsers}"
+                                RowBackground="White">
+                                <DataGrid.RowStyle>
+                                    <Style TargetType="DataGridRow">
+                                        <Setter Property="BorderThickness" Value="0,0,0,1" />
+                                        <Setter Property="BorderBrush" Value="Black" />
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="Foreground" Value="Black" />
+                                        <Setter Property="OverridesDefaultStyle" Value="False" />
+                                    </Style>
+                                </DataGrid.RowStyle>
+                                <DataGrid.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <Setter Property="BorderThickness" Value="0" />
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="Foreground" Value="Black" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                        <Style.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="Background" Value="Transparent" />
+                                                <Setter Property="Foreground" Value="Black" />
+                                                <Setter Property="BorderThickness" Value="0" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGrid.CellStyle>
+                                <DataGrid.ColumnHeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="BorderThickness" Value="0,0,0,1" />
+                                        <Setter Property="BorderBrush" Value="Black" />
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="Margin" Value="5,5,5,5" />
+                                        <Setter Property="FontWeight" Value="SemiBold" />
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="Transparent" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn
+                                        Width="*"
+                                        Binding="{Binding IdUser}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        Header="N. usuario" />
+                                    <DataGridTextColumn
+                                        Width="*"
+                                        Binding="{Binding Username}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        Header="Usuario" />
+                                    <DataGridTextColumn
+                                        Width="2*"
+                                        Binding="{Binding Names}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        Header="Nombre" />
+                                    <DataGridTextColumn
+                                        Width="2*"
+                                        Binding="{Binding Lastnames}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        Header="Apellido" />
+                                    <DataGridTextColumn
+                                        Width="2*"
+                                        Binding="{Binding Email}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        Header="Email" />
+                                    <DataGridTextColumn
+                                        Width="*"
+                                        Binding="{Binding Phone}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        Header="Teléfono" />
+                                    <DataGridTemplateColumn Width="*" Header="Rol">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Border
+                                                    Padding="6,4"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    Background="{Binding Role, Converter={StaticResource RoleToBrushConverter}}"
+                                                    CornerRadius="8">
+                                                    <TextBlock
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center"
+                                                        FontSize="18"
+                                                        FontWeight="DemiBold"
+                                                        Foreground="#111111"
+                                                        Text="{Binding Role, Converter={StaticResource RoleDisplayConverter}}" />
+                                                </Border>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Width="Auto" Header="Editar">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button
+                                                    Margin="5,8"
+                                                    Padding="15,5"
+                                                    HorizontalAlignment="Center"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Click="EditUser_Click"
+                                                    CommandParameter="other-users"
+                                                    Cursor="Hand"
+                                                    Tag="{Binding}">
+                                                    <Image
+                                                        Width="20"
+                                                        Height="20"
+                                                        Source="pack://application:,,,/Resources/pencil.png"
+                                                        Stretch="Uniform" />
+                                                </Button>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
                         </Border>
                     </Grid>
                 </Grid>
             </Border>
         </Grid>
-        <Grid x:Name="NotificationContainer" 
-              IsHitTestVisible="False"
-              VerticalAlignment="Top"
-              HorizontalAlignment="Right"
-              Margin="20"/>
+        <Grid
+            x:Name="NotificationContainer"
+            Margin="20"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            IsHitTestVisible="False" />
     </Grid>
 </Window>

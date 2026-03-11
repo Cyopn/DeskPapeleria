@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -24,43 +25,16 @@ namespace DeskApp
         public static void Initialize(Grid container)
         {
             _notificationContainer = container;
-
-            try
-            {
-                foreach (UIElement child in _notificationContainer.Children)
-                {
-                    if (child is StackPanel sp && sp.Tag as string == "_toast_stack")
-                    {
-                        _stackPanel = sp;
-                        break;
-                    }
-                }
-
-                if (_stackPanel == null)
-                {
-                    _stackPanel = new StackPanel
-                    {
-                        Orientation = Orientation.Vertical,
-                        HorizontalAlignment = HorizontalAlignment.Right,
-                        VerticalAlignment = VerticalAlignment.Top,
-                        Margin = new Thickness(0, 8, 8, 0),
-                        Tag = "_toast_stack"
-                    };
-                    _stackPanel.IsHitTestVisible = false;
-
-                    _notificationContainer.Children.Add(_stackPanel);
-                }
-            }
-            catch
-            {
-            }
+            EnsureStackForCurrentContainer();
         }
 
         public static void Show(string message, ToastType type = ToastType.Info, int durationSeconds = 3)
         {
+            TryBindToIndexWindowContainer();
+
             if (_notificationContainer == null || _stackPanel == null)
             {
-                throw new InvalidOperationException("ToastNotification no ha sido inicializado. Llama a Initialize() primero.");
+                return;
             }
 
             Application.Current.Dispatcher.Invoke(() =>
@@ -98,6 +72,70 @@ namespace DeskApp
                 };
                 timer.Start();
             });
+        }
+
+        private static void TryBindToIndexWindowContainer()
+        {
+            try
+            {
+                var indexWindow = Application.Current?.Windows
+                    .OfType<Window>()
+                    .FirstOrDefault(w => w is IndexWindow && w.IsVisible);
+
+                if (indexWindow == null)
+                    return;
+
+                var container = indexWindow.FindName("NotificationContainer") as Grid;
+                if (container == null)
+                    return;
+
+                if (!ReferenceEquals(_notificationContainer, container))
+                {
+                    _notificationContainer = container;
+                    _stackPanel = null;
+                    EnsureStackForCurrentContainer();
+                }
+            }
+            catch
+            {
+            }
+        }
+
+        private static void EnsureStackForCurrentContainer()
+        {
+            if (_notificationContainer == null)
+                return;
+
+            try
+            {
+                _stackPanel = null;
+                foreach (UIElement child in _notificationContainer.Children)
+                {
+                    if (child is StackPanel sp && sp.Tag as string == "_toast_stack")
+                    {
+                        _stackPanel = sp;
+                        break;
+                    }
+                }
+
+                if (_stackPanel == null)
+                {
+                    _stackPanel = new StackPanel
+                    {
+                        Orientation = Orientation.Vertical,
+                        HorizontalAlignment = HorizontalAlignment.Right,
+                        VerticalAlignment = VerticalAlignment.Top,
+                        Margin = new Thickness(0, 8, 8, 0),
+                        Tag = "_toast_stack"
+                    };
+                    _stackPanel.IsHitTestVisible = false;
+
+                    _notificationContainer.Children.Add(_stackPanel);
+                }
+            }
+            catch
+            {
+            }
         }
 
         private static Border CreateToast(string message, ToastType type)

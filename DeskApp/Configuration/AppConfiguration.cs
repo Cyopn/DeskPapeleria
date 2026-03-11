@@ -13,7 +13,7 @@ namespace DeskApp.Configuration
 
         private AppConfiguration()
         {
-            ApiBaseUrl = "https://noninitial-chirurgical-judah.ngrok-free.dev/api";
+            ApiBaseUrl = "http://localhost:5000/api";
             UsersEndpoint = "/users/";
             LoginEndpoint = "/users/login";
 

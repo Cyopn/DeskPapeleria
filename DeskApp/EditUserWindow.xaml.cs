@@ -12,20 +12,24 @@ namespace DeskApp
         private readonly ApiService _apiService;
         private readonly SessionService _sessionService;
         private readonly UserData _user;
-        private readonly RoleOption[] _roleOptions = new[]
-        {
-            new RoleOption("Administrador", "admin"),
-            new RoleOption("Gerente", "manager"),
-            new RoleOption("Supervisor", "supervisor"),
-            new RoleOption("Empleado", "employee")
-        };
+        private readonly RoleOption[] _roleOptions;
 
-        public EditUserWindow(UserData user)
+        public EditUserWindow(UserData user, RoleOption[]? roleOptions = null, string windowTitle = "Editar empleado")
         {
             InitializeComponent();
             _apiService = ApiService.Instance;
             _sessionService = SessionService.Instance;
             _user = user;
+            _roleOptions = roleOptions ?? new[]
+            {
+                new RoleOption("Administrador", "admin"),
+                new RoleOption("Gerente", "manager"),
+                new RoleOption("Supervisor", "supervisor"),
+                new RoleOption("Empleado", "employee")
+            };
+
+            WindowTitleTextBlock.Text = windowTitle;
+            Title = windowTitle;
 
             RoleComboBox.ItemsSource = _roleOptions;
             RoleComboBox.SelectedValuePath = "Value";
@@ -46,6 +50,10 @@ namespace DeskApp
             if (match != null)
             {
                 RoleComboBox.SelectedItem = match;
+            }
+            else if (_roleOptions.Length > 0)
+            {
+                RoleComboBox.SelectedIndex = 0;
             }
         }
 

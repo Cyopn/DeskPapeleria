@@ -39,6 +39,12 @@ namespace DeskApp.Models
         [JsonPropertyName("product")]
         public ProductData? Product { get; set; }
 
+        [JsonPropertyName("id_printer")]
+        public int? IdPrinter { get; set; } = null!;
+
+        [JsonPropertyName("printer")]
+        public PrinterData? Printer { get; set; } = null!;
+
         [JsonPropertyName("created_at")]
         public DateTime CreatedAt { get; set; }
 
@@ -74,6 +80,9 @@ namespace DeskApp.Models
 
         [JsonPropertyName("id_print")]
         public int? IdPrint { get; set; }
+
+        [JsonPropertyName("id_printer")]
+        public int? IdPrinter { get; set; } = null!;
     }
 
     public class PrintUpdateRequest
@@ -101,6 +110,9 @@ namespace DeskApp.Models
 
         [JsonPropertyName("status")]
         public string? Status { get; set; }
+
+        [JsonPropertyName("id_printer")]
+        public int? IdPrinter { get; set; } = null!;
     }
 
     public class PrintResponse

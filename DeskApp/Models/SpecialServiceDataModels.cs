@@ -11,11 +11,20 @@ namespace DeskApp.Models
         [JsonPropertyName("id_special_service_data")]
         public int IdSpecialServiceData { get; set; }
 
+        [JsonPropertyName("id_special_service")]
+        public int? IdSpecialService { get; set; }
+
         [JsonPropertyName("id_print")]
         public int IdPrint { get; set; }
 
+        [JsonPropertyName("status")]
+        public string? Status { get; set; }
+
         [JsonPropertyName("print")]
         public PrintData? Print { get; set; }
+
+        [JsonPropertyName("data")]
+        public SpecialServiceLinkData? Data { get; set; }
 
         [JsonPropertyName("special_service")]
         public SpecialService? SpecialService { get; set; }
@@ -25,6 +34,12 @@ namespace DeskApp.Models
 
         [JsonPropertyName("updated_at")]
         public DateTime? UpdatedAt { get; set; }
+    }
+
+    public class SpecialServiceLinkData
+    {
+        [JsonPropertyName("id_print")]
+        public int IdPrint { get; set; }
     }
 
     public class SpecialServiceDataCreateRequest
@@ -58,6 +73,9 @@ namespace DeskApp.Models
 
         [JsonPropertyName("id_special_service")]
         public int IdSpecialService { get; set; }
+
+        [JsonPropertyName("status")]
+        public string? Status { get; set; }
 
         [JsonPropertyName("created_at")]
         public DateTime CreatedAt { get; set; }

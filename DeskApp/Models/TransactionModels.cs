@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace DeskApp.Models
@@ -25,9 +27,14 @@ namespace DeskApp.Models
         public UserData? User { get; set; }
 
         [JsonPropertyName("qr_code")]
+        [JsonConverter(typeof(FlexibleQrCodeConverter))]
         public QRCodeData? QrCode { get; set; }
 
+        [JsonPropertyName("details")]
+        public List<DetailTransactionData>? Details { get; set; }
+
         [JsonPropertyName("total")]
+        [JsonConverter(typeof(DeskApp.DecimalConverter))]
         public decimal Total { get; set; }
 
         [JsonPropertyName("status")]
@@ -42,6 +49,44 @@ namespace DeskApp.Models
 
         [JsonPropertyName("updated_at")]
         public DateTime? UpdatedAt { get; set; }
+    }
+
+    public class FlexibleQrCodeConverter : JsonConverter<QRCodeData?>
+    {
+        public override QRCodeData? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            if (reader.TokenType == JsonTokenType.Null)
+            {
+                return null;
+            }
+
+            if (reader.TokenType == JsonTokenType.String)
+            {
+                var base64 = reader.GetString();
+                return string.IsNullOrWhiteSpace(base64)
+                    ? null
+                    : new QRCodeData { QrImageBase64 = base64 };
+            }
+
+            if (reader.TokenType == JsonTokenType.StartObject)
+            {
+                using var doc = JsonDocument.ParseValue(ref reader);
+                return JsonSerializer.Deserialize<QRCodeData>(doc.RootElement.GetRawText(), options);
+            }
+
+            return null;
+        }
+
+        public override void Write(Utf8JsonWriter writer, QRCodeData? value, JsonSerializerOptions options)
+        {
+            if (value == null)
+            {
+                writer.WriteNullValue();
+                return;
+            }
+
+            JsonSerializer.Serialize(writer, value, options);
+        }
     }
 
     public class TransactionCreateRequest

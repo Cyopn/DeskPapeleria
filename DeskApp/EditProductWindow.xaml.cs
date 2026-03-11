@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -66,14 +66,14 @@ namespace DeskApp
                     _ = ShowFilePreviewAsync(previewFile).ContinueWith(t => {
                         if (t.Exception != null)
                         {
-                            try { Console.WriteLine($"[EditProduct] ShowFilePreview exception: {t.Exception}"); } catch { }
+                            try { System.Diagnostics.Debug.WriteLine($"[EditProduct] ShowFilePreview exception: {t.Exception}"); } catch { }
                         }
                     }, TaskScheduler.FromCurrentSynchronizationContext());
                 }
             }
             catch (Exception ex)
             {
-                try { Console.WriteLine($"[EditProduct] Constructor exception: {ex}"); } catch { }
+                try { System.Diagnostics.Debug.WriteLine($"[EditProduct] Constructor exception: {ex}"); } catch { }
                 try { System.Diagnostics.Debug.WriteLine($"[EditProduct] Constructor exception: {ex}"); } catch { }
                 ToastNotification.Show($"Error al abrir editor: {ex.Message}", ToastType.Error, 4);
                 this.DialogResult = false;
@@ -153,7 +153,7 @@ namespace DeskApp
 
         private async void SaveButton_Click(object sender, RoutedEventArgs e)
         {
-            var confirm = MessageBox.Show("¿Deseas guardar los cambios en este producto?", "Confirmar guardar", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            var confirm = MessageBox.Show("Â¿Deseas guardar los cambios en este producto?", "Confirmar guardar", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (confirm != MessageBoxResult.Yes) return;
 
             SaveButton.IsEnabled = false;
@@ -286,15 +286,15 @@ namespace DeskApp
                 try
                 {
                     var jsonPreserve = System.Text.Json.JsonSerializer.Serialize(request, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = null });
-                    Console.WriteLine($"[EditProduct] PUT /products/{Product.IdProduct} - Request JSON (preserve): {jsonPreserve}");
+                    System.Diagnostics.Debug.WriteLine($"[EditProduct] PUT /products/{Product.IdProduct} - Request JSON (preserve): {jsonPreserve}");
                     var jsonCamel = System.Text.Json.JsonSerializer.Serialize(request, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
-                    Console.WriteLine($"[EditProduct] PUT /products/{Product.IdProduct} - Request JSON (camelCase): {jsonCamel}");
-                    Console.WriteLine($"[EditProduct] Bearer token present: {!string.IsNullOrWhiteSpace(token2)}");
-                    Console.WriteLine($"[EditProduct] Request.IdFile: {request.IdFile}");
+                    System.Diagnostics.Debug.WriteLine($"[EditProduct] PUT /products/{Product.IdProduct} - Request JSON (camelCase): {jsonCamel}");
+                    System.Diagnostics.Debug.WriteLine($"[EditProduct] Bearer token present: {!string.IsNullOrWhiteSpace(token2)}");
+                    System.Diagnostics.Debug.WriteLine($"[EditProduct] Request.IdFile: {request.IdFile}");
                     if (request.File != null)
                     {
-                        Console.WriteLine($"[EditProduct] Request.File.Filename: {request.File.Filename}");
-                        Console.WriteLine($"[EditProduct] Request.File.FileHash: {request.File.FileHash}");
+                        System.Diagnostics.Debug.WriteLine($"[EditProduct] Request.File.Filename: {request.File.Filename}");
+                        System.Diagnostics.Debug.WriteLine($"[EditProduct] Request.File.FileHash: {request.File.FileHash}");
                     }
                 }
                 catch { }
@@ -316,7 +316,7 @@ namespace DeskApp
             {
                 try
                 {
-                    Console.WriteLine($"[EditProduct] Save exception: {ex}");
+                    System.Diagnostics.Debug.WriteLine($"[EditProduct] Save exception: {ex}");
                 }
                 catch { }
                 try
@@ -335,7 +335,7 @@ namespace DeskApp
 
         private async void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
-            var confirm = MessageBox.Show("¿Estás seguro de eliminar este producto?", "Confirmar eliminación", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            var confirm = MessageBox.Show("Â¿EstÃ¡s seguro de eliminar este producto?", "Confirmar eliminaciÃ³n", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (confirm != MessageBoxResult.Yes) return;
 
             try
@@ -397,7 +397,7 @@ namespace DeskApp
                 bitmap.Freeze();
                 PreviewImage.Source = bitmap;
 
-                ToastNotification.Show("Imagen cargada localmente. Se subirá al guardar.", ToastType.Info, 2);
+                ToastNotification.Show("Imagen cargada localmente. Se subirÃ¡ al guardar.", ToastType.Info, 2);
             }
             catch (Exception ex)
             {
@@ -522,3 +522,4 @@ namespace DeskApp
         }
     }
 }
+

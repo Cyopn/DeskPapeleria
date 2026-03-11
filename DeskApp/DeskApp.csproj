@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,6 +23,8 @@
     <None Remove="Resources\pencil.png" />
     <None Remove="Resources\phone.png" />
     <None Remove="Resources\printer.png" />
+    <None Remove="Resources\sales.png" />
+    <None Remove="Resources\trash.png" />
     <None Remove="Resources\user.png" />
   </ItemGroup>
 
@@ -39,7 +42,25 @@
     <Resource Include="Resources\pencil.png" />
     <Resource Include="Resources\phone.png" />
     <Resource Include="Resources\printer.png" />
+    <Resource Include="Resources\sales.png" />
+    <Resource Include="Resources\trash.png" />
     <Resource Include="Resources\user.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Management" Version="8.0.0" />
+    <PackageReference Include="Ghostscript.NET" Version="1.3.3-rc.2" />
+    <PackageReference Include="System.Drawing.Common" Version="8.0.0" />
+  </ItemGroup>
+
+  <!-- Bundle ghostscript native runtime if present in project runtimes folder -->
+  <ItemGroup>
+    <Content Include="runtimes\win-x64\native\gsdll64.dll" Condition="Exists('runtimes\win-x64\native\gsdll64.dll')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="runtimes\win-x86\native\gsdll32.dll" Condition="Exists('runtimes\win-x86\native\gsdll32.dll')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
