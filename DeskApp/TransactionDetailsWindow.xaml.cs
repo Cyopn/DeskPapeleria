@@ -45,13 +45,24 @@ namespace DeskApp
             var hasPendingSpecialServices = GetPendingSpecialServiceProductIds().Count > 0;
             var hasActiveSpecialServiceFiles = HasActiveFilesForProductType(IsSpecialServiceProduct);
             var hasActivePrintFiles = HasActiveFilesForProductType(IsPrintProduct);
+            var hasOnlyItemProducts = HasOnlyItemProducts();
 
-            PrintFilesButton.IsEnabled = hasActiveFiles;
+            PrintFilesButton.IsEnabled = hasActiveFiles && !hasOnlyItemProducts;
             CompleteSpecialServiceButton.IsEnabled = hasPendingSpecialServices && !hasActiveSpecialServiceFiles;
             CompletePurchaseButton.IsEnabled = Transaction.Status != TransactionStatusEnum.Completed
                                              && !hasPendingSpecialServices
                                              && !hasActivePrintFiles
                                              && !hasActiveSpecialServiceFiles;
+        }
+
+        private bool HasOnlyItemProducts()
+        {
+            if (Transaction.Details == null || Transaction.Details.Count == 0)
+                return false;
+
+            return Transaction.Details.All(d =>
+                d.Product != null &&
+                (d.Product.Type == ProductTypeEnum.Item || d.Product.Item != null));
         }
 
         private bool HasActiveFilesForProductType(Func<ProductData?, bool> productPredicate)
@@ -233,7 +244,7 @@ namespace DeskApp
                            ?? d.Product?.Description
                            ?? $"Producto #{d.IdProduct}";
 
-                var type = d.Product?.Type.ToString() ?? "No aplica";
+                var type = GetProductTypeDisplay(d.Product);
                 var previewFile = GetPreviewFile(d.Product);
                 var showPreviewButton = ShouldShowPdfPreviewButton(d.Product, previewFile);
 
@@ -252,6 +263,30 @@ namespace DeskApp
                     ShowPreviewButton = showPreviewButton
                 });
             }
+        }
+
+        private static string GetProductTypeDisplay(ProductData? product)
+        {
+            if (product == null)
+                return "No aplica";
+
+            if (product.SpecialService != null || product.Type == ProductTypeEnum.SpecialService)
+                return "Servicio especial";
+
+            if (product.Print != null || product.Type == ProductTypeEnum.Print)
+                return "Impresion";
+
+            if (product.Item != null || product.Type == ProductTypeEnum.Item)
+                return "Articulo";
+
+            var raw = product.Type.ToString().Trim().ToLowerInvariant();
+            return raw switch
+            {
+                "item" => "Articulo",
+                "print" => "Impresion",
+                "special_service" => "Servicio especial",
+                _ => product.Type.ToString()
+            };
         }
 
         private static bool ShouldShowPdfPreviewButton(ProductData? product, FileData? previewFile)

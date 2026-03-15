@@ -380,6 +380,10 @@ namespace DeskApp
 
         private void OtrosButton_MouseEnter(object sender, MouseEventArgs e)
         {
+        }
+
+        private void OtrosButton_Click(object sender, RoutedEventArgs e)
+        {
             if (sender is Button button && button.ContextMenu != null)
             {
                 button.ContextMenu.PlacementTarget = button;
@@ -679,6 +683,11 @@ namespace DeskApp
             if (row?.Item is not TransactionData selected)
                 return;
 
+            await OpenTransactionDetailsAsync(selected);
+        }
+
+        private async Task OpenTransactionDetailsAsync(TransactionData selected)
+        {
             var transactionToShow = selected;
 
             try
@@ -708,6 +717,20 @@ namespace DeskApp
             {
                 await LoadTransactionsAsync();
             }
+        }
+
+        private async void OpenQrScanWindow_Click(object sender, RoutedEventArgs e)
+        {
+            var qrWindow = new QrScanWindow
+            {
+                Owner = this
+            };
+
+            if (qrWindow.ShowDialog() != true || qrWindow.ScannedTransaction == null)
+                return;
+
+            ToastNotification.Show("QR escaneado exitosamente", ToastType.Success, 2);
+            await OpenTransactionDetailsAsync(qrWindow.ScannedTransaction);
         }
 
         private static T? FindVisualParent<T>(DependencyObject? child) where T : DependencyObject
@@ -939,6 +962,13 @@ namespace DeskApp
             var type = tx.Type.ToString().ToLowerInvariant();
             var status = tx.Status.ToString().ToLowerInvariant();
             var payment = tx.PaymentMethod?.Trim().ToLowerInvariant() ?? string.Empty;
+            var paymentDisplay = payment switch
+            {
+                "cash" => "efectivo",
+                "card" => "tarjeta",
+                "transfer" => "transferencia",
+                _ => payment
+            };
             var idTransaction = tx.IdTransaction.ToString();
             var idUserPrimary = tx.IdUser?.ToString() ?? string.Empty;
             var idUserFromUser = tx.User?.IdUser.ToString() ?? string.Empty;
@@ -951,6 +981,8 @@ namespace DeskApp
                                  || idUserFromUser.Contains(search)
                                  || idUserFromEntity.Contains(search);
 
+            bool paymentMatches = payment.Contains(search) || paymentDisplay.Contains(search);
+
             return _transactionSearchField switch
             {
                 "id_transaction" => idTransaction.Contains(search),
@@ -960,7 +992,7 @@ namespace DeskApp
                 "user" => user.Contains(search),
                 "total" => total.Contains(search),
                 "status" => status.Contains(search),
-                "payment_method" => payment.Contains(search),
+                "payment_method" => paymentMatches,
                 _ => idTransaction.ToLowerInvariant().Contains(search)
                      || idUserMatches
                      || type.Contains(search)
@@ -968,7 +1000,7 @@ namespace DeskApp
                      || user.Contains(search)
                      || total.Contains(search)
                      || status.Contains(search)
-                     || payment.Contains(search)
+                     || paymentMatches
             };
         }
 

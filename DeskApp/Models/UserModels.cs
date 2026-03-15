@@ -42,8 +42,14 @@ namespace DeskApp.Models
 
     public class LoginRequest
     {
+        [JsonPropertyName("identifier")]
+        public string? Identifier { get; set; }
+
         [JsonPropertyName("username")]
-        public string Username { get; set; } = string.Empty;
+        public string? Username { get; set; }
+
+        [JsonPropertyName("email")]
+        public string? Email { get; set; }
 
         [JsonPropertyName("password")]
         public string Password { get; set; } = string.Empty;

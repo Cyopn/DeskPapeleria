@@ -184,7 +184,8 @@ namespace DeskApp.Services
                 
                 var jsonContent = JsonSerializer.Serialize(request, new JsonSerializerOptions
                 {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
                 });
 
                 var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
@@ -1394,6 +1395,91 @@ namespace DeskApp.Services
                 result.StatusCode = 0;
                 result.ErrorMessage = $"Error inesperado: {ex.Message}";
             }
+            return result;
+        }
+
+        public async Task<ApiResult<TransactionQrScanResponse>> ScanTransactionQrAsync(string qrJson, string bearerToken)
+        {
+            var result = new ApiResult<TransactionQrScanResponse>();
+
+            try
+            {
+                if (string.IsNullOrWhiteSpace(bearerToken))
+                {
+                    result.Success = false;
+                    result.StatusCode = 401;
+                    result.ErrorMessage = "Token de autenticación no disponible";
+                    return result;
+                }
+
+                if (string.IsNullOrWhiteSpace(qrJson))
+                {
+                    result.Success = false;
+                    result.StatusCode = 400;
+                    result.ErrorMessage = "QR JSON vacío";
+                    return result;
+                }
+
+                using var qrDoc = JsonDocument.Parse(qrJson);
+                var qrObject = qrDoc.RootElement;
+                var url = _config.GetFullUrl("/transactions/scan-qr");
+
+                var payloadCandidates = new[]
+                {
+                    qrObject.GetRawText(),
+                    JsonSerializer.Serialize(new { qr_data = qrObject }),
+                    JsonSerializer.Serialize(new { qrData = qrObject }),
+                    JsonSerializer.Serialize(new { data = qrObject })
+                };
+
+                foreach (var payload in payloadCandidates)
+                {
+                    using var request = new HttpRequestMessage(HttpMethod.Post, url)
+                    {
+                        Content = new StringContent(payload, Encoding.UTF8, "application/json")
+                    };
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+
+                    var response = await _httpClient.SendAsync(request);
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    result.StatusCode = (int)response.StatusCode;
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        continue;
+                    }
+
+                    var parsed = JsonSerializer.Deserialize<TransactionQrScanResponse>(
+                        responseContent,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    result.Success = true;
+                    result.Data = parsed;
+                    return result;
+                }
+
+                result.Success = false;
+                result.ErrorMessage = "No se pudo procesar el QR en el servidor";
+            }
+            catch (TaskCanceledException)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = "La solicitud ha excedido el tiempo de espera";
+            }
+            catch (HttpRequestException ex)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = $"Error de conexión: {ex.Message}";
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = $"Error inesperado: {ex.Message}";
+            }
+
             return result;
         }
     }

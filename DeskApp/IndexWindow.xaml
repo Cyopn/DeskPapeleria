@@ -55,6 +55,43 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+        <Style x:Key="OtrosContextMenuStyle" TargetType="ContextMenu">
+            <Setter Property="Background" Value="#D9D9D9" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="6" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ContextMenu">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="18">
+                            <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="OtrosMenuItemStyle" TargetType="MenuItem">
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="Padding" Value="14,8" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="MenuItem">
+                        <Border x:Name="ItemBorder" Background="{TemplateBinding Background}" CornerRadius="12" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter ContentSource="Header" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="ItemBorder" Property="Background" Value="#33FFFFFF" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <local:RoleDisplayConverter x:Key="RoleDisplayConverter" />
         <local:RoleToBrushConverter x:Key="RoleToBrushConverter" />
         <local:BoolSiNoConverter x:Key="BoolSiNoConverter" />
@@ -253,7 +290,7 @@
                                     HorizontalAlignment="Left"
                                     IsHitTestVisible="False">
                                     <Image.Source>
-                                        <BitmapImage UriSource="pack://application:,,,/Resources/hand.png" />
+                                        <BitmapImage UriSource="pack://application:,,,/Resources/user.png" />
                                     </Image.Source>
                                 </Image>
                                 <TextBlock
@@ -267,13 +304,12 @@
                         <Button
                             x:Name="OtrosButton"
                             Padding="5,10,15,10"
-                            Click="MenuButton_Click"
-                            MouseEnter="OtrosButton_MouseEnter"
+                            Click="OtrosButton_Click"
                             Style="{StaticResource MenuButtonStyle}"
                             Tag="Otros">
                             <Button.ContextMenu>
-                                <ContextMenu Placement="Bottom" StaysOpen="False">
-                                    <MenuItem Click="LogoutButton_Click" Header="Cerrar sesión" />
+                                <ContextMenu Style="{StaticResource OtrosContextMenuStyle}" Placement="Bottom" StaysOpen="False">
+                                    <MenuItem Click="LogoutButton_Click" Header="Cerrar sesión" Style="{StaticResource OtrosMenuItemStyle}" />
                                 </ContextMenu>
                             </Button.ContextMenu>
                             <Grid>
@@ -1046,6 +1082,7 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
                                 <Border
@@ -1224,6 +1261,19 @@
                                     Grid.Column="8"
                                     Width="40"
                                     Height="40"
+                                    Margin="0,0,8,0"
+                                    Background="#D9D9D9"
+                                    BorderThickness="0"
+                                    Click="OpenQrScanWindow_Click"
+                                    Content="📷"
+                                    Cursor="Hand"
+                                    FontSize="18"
+                                    ToolTip="Escanear QR" />
+
+                                <Button
+                                    Grid.Column="9"
+                                    Width="40"
+                                    Height="40"
                                     Margin="0,0,50,0"
                                     Background="#D9D9D9"
                                     BorderThickness="0"
@@ -1252,6 +1302,7 @@
                                 BorderThickness="0"
                                 CanUserReorderColumns="False"
                                 CanUserResizeColumns="False"
+                                Cursor="Hand"
                                 FontSize="20"
                                 FontWeight="DemiBold"
                                 GridLinesVisibility="None"
@@ -1266,7 +1317,35 @@
                                         <Setter Property="BorderBrush" Value="Black" />
                                         <Setter Property="Background" Value="Transparent" />
                                         <Setter Property="Foreground" Value="Black" />
+                                        <Setter Property="Cursor" Value="Hand" />
                                         <Setter Property="OverridesDefaultStyle" Value="False" />
+                                        <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+                                        <Setter Property="RenderTransform">
+                                            <Setter.Value>
+                                                <ScaleTransform ScaleX="1" ScaleY="1" />
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#22FFD54F" />
+                                                <Trigger.EnterActions>
+                                                    <BeginStoryboard>
+                                                        <Storyboard>
+                                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.01" Duration="0:0:0.12" />
+                                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.01" Duration="0:0:0.12" />
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </Trigger.EnterActions>
+                                                <Trigger.ExitActions>
+                                                    <BeginStoryboard>
+                                                        <Storyboard>
+                                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.12" />
+                                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.12" />
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </Trigger.ExitActions>
+                                            </Trigger>
+                                        </Style.Triggers>
                                     </Style>
                                 </DataGrid.RowStyle>
                                 <DataGrid.CellStyle>
@@ -1276,6 +1355,13 @@
                                         <Setter Property="Foreground" Value="Black" />
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
                                         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                        <Style.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="Background" Value="Transparent" />
+                                                <Setter Property="Foreground" Value="Black" />
+                                                <Setter Property="BorderThickness" Value="0" />
+                                            </Trigger>
+                                        </Style.Triggers>
                                     </Style>
                                 </DataGrid.CellStyle>
                                 <DataGrid.ColumnHeaderStyle>
@@ -1286,6 +1372,11 @@
                                         <Setter Property="HorizontalContentAlignment" Value="Center" />
                                         <Setter Property="Margin" Value="5,5,5,5" />
                                         <Setter Property="FontWeight" Value="DemiBold" />
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="Transparent" />
+                                            </Trigger>
+                                        </Style.Triggers>
                                     </Style>
                                 </DataGrid.ColumnHeaderStyle>
                                 <DataGrid.Columns>
@@ -1299,6 +1390,11 @@
                                         Binding="{Binding Type}"
                                         ElementStyle="{StaticResource DataGridCellTextStyle}"
                                         Header="Tipo" />
+                                    <DataGridTextColumn
+                                        Width="*"
+                                        Binding="{Binding ProductTypeDisplay}"
+                                        ElementStyle="{StaticResource DataGridCellTextStyle}"
+                                        Header="Producto" />
                                     <DataGridTextColumn
                                         Width="*"
                                         Binding="{Binding Date, StringFormat=G}"

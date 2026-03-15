@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -49,6 +50,38 @@ namespace DeskApp.Models
 
         [JsonPropertyName("updated_at")]
         public DateTime? UpdatedAt { get; set; }
+
+        [JsonIgnore]
+        public string ProductTypeDisplay
+        {
+            get
+            {
+                var details = Details;
+                if (details == null || details.Count == 0)
+                    return "No aplica";
+
+                bool hasItem = details.Any(d => d?.Product != null && (d.Product.Type == DeskApp.ProductTypeEnum.Item || d.Product.Item != null));
+                bool hasPrint = details.Any(d => d?.Product != null && (d.Product.Type == DeskApp.ProductTypeEnum.Print || d.Product.Print != null));
+                bool hasSpecialService = details.Any(d => d?.Product != null && (d.Product.Type == DeskApp.ProductTypeEnum.SpecialService || d.Product.SpecialService != null));
+
+                if (hasSpecialService)
+                    return "Servicio especial";
+
+                if (hasPrint && !hasItem)
+                    return "Impresion";
+
+                if (hasItem && !hasPrint)
+                    return "Articulo";
+
+                if (hasPrint)
+                    return "Impresion";
+
+                if (hasItem)
+                    return "Articulo";
+
+                return "No aplica";
+            }
+        }
     }
 
     public class FlexibleQrCodeConverter : JsonConverter<QRCodeData?>

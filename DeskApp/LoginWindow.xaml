@@ -225,7 +225,7 @@
                                 FontSize="22"
                                 Foreground="#808080"
                                 IsHitTestVisible="False"
-                                Text="Nombre de usuario">
+                                Text="Usuario o correo">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Visibility" Value="Collapsed" />

@@ -116,10 +116,14 @@ namespace DeskApp
                 ToastNotification.Show("Iniciando sesión...", ToastType.Info, 2);
 
                 var password = _isPasswordVisible ? PasswordTextBox.Text : PasswordBox.Password;
+                var loginInput = UsernameTextBox.Text.Trim();
+                var isEmail = loginInput.Contains('@');
 
                 var request = new LoginRequest
                 {
-                    Username = UsernameTextBox.Text.Trim(),
+                    Identifier = loginInput,
+                    Username = isEmail ? null : loginInput,
+                    Email = isEmail ? loginInput : null,
                     Password = password
                 };
 
@@ -247,7 +251,7 @@ namespace DeskApp
         {
             if (string.IsNullOrWhiteSpace(UsernameTextBox.Text))
             {
-                ToastNotification.Show("El nombre de usuario es obligatorio", ToastType.Error);
+                ToastNotification.Show("El usuario o correo es obligatorio", ToastType.Error);
                 UsernameTextBox.Focus();
                 return false;
             }
