@@ -162,11 +162,13 @@
                 Width="90"
                 Margin="0,0,8,0"
                 Click="CancelButton_Click"
-                Content="Cancelar" />
+                Content="Cancelar" 
+                Cursor="Hand"/>
             <Button
                 Width="110"
                 Click="PrintButton_Click"
-                Content="Imprimir" />
+                Content="Imprimir" 
+                Cursor="Hand"/>
         </StackPanel>
     </Grid>
 </Window>

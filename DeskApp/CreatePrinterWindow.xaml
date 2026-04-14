@@ -146,10 +146,8 @@
                         FontSize="14"
                         IsEnabled="False"
                         SelectedIndex="0">
-                        <sys:String>Unknown</sys:String>
                         <sys:String>Usb</sys:String>
                         <sys:String>Network</sys:String>
-                        <sys:String>Installed</sys:String>
                     </ComboBox>
                 </Border>
             </StackPanel>

@@ -274,13 +274,7 @@ namespace DeskApp
                     DeskApp.Models.PrinterStatus.Offline => 2,
                     _ => 0
                 };
-                TypeComboBox.SelectedIndex = pd.ConnectionType switch
-                {
-                    PrinterConnectionType.Usb => 1,
-                    PrinterConnectionType.Network => 2,
-                    PrinterConnectionType.Installed => 3,
-                    _ => 0
-                };
+                TypeComboBox.SelectedIndex = pd.ConnectionType == PrinterConnectionType.Network ? 1 : 0;
             }
         }
 
@@ -302,7 +296,7 @@ namespace DeskApp
                 2 => DeskApp.Models.PrinterStatus.Offline,
                 _ => DeskApp.Models.PrinterStatus.Available
             };
-            var connectionType = (PrinterConnectionType)TypeComboBox.SelectedIndex;
+            var connectionType = TypeComboBox.SelectedIndex == 1 ? PrinterConnectionType.Network : PrinterConnectionType.Usb;
 
             PrinterData? target = null;
             if (PrintersComboBox.SelectedItem is PrinterData selected)

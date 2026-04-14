@@ -1482,5 +1482,62 @@ namespace DeskApp.Services
 
             return result;
         }
+
+        public async Task<ApiResult<List<TransactionData>>> GetTransactionsDetailsAsync(string bearerToken)
+        {
+            var result = new ApiResult<List<TransactionData>>();
+            try
+            {
+                var url = _config.GetFullUrl("/transactions/details");
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                if (string.IsNullOrWhiteSpace(bearerToken))
+                {
+                    result.Success = false;
+                    result.StatusCode = 401;
+                    result.ErrorMessage = "Token de autenticación no disponible";
+                    return result;
+                }
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+                var response = await _httpClient.SendAsync(request);
+                var responseContent = await response.Content.ReadAsStringAsync();
+                result.StatusCode = (int)response.StatusCode;
+                if (response.IsSuccessStatusCode)
+                {
+                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    using var doc = JsonDocument.Parse(responseContent);
+                    var root = doc.RootElement;
+                    List<TransactionData>? parsed = null;
+                    if (root.ValueKind == JsonValueKind.Object && root.TryGetProperty("transactions", out var txs) && txs.ValueKind == JsonValueKind.Array)
+                    {
+                        parsed = JsonSerializer.Deserialize<List<TransactionData>>(txs.GetRawText(), options);
+                    }
+                    else if (root.ValueKind == JsonValueKind.Array)
+                    {
+                        parsed = JsonSerializer.Deserialize<List<TransactionData>>(responseContent, options);
+                    }
+                    else if (root.ValueKind == JsonValueKind.Object)
+                    {
+                        var single = JsonSerializer.Deserialize<TransactionData>(responseContent, options);
+                        if (single != null) parsed = new List<TransactionData> { single };
+                    }
+                    result.Success = true;
+                    result.Data = parsed ?? new List<TransactionData>();
+                }
+                else
+                {
+                    result.Success = false;
+                    var parsed = ExtractApiError(responseContent, result.StatusCode);
+                    result.ErrorMessage = parsed.Message;
+                    result.ValidationErrors = parsed.ValidationErrors;
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.StatusCode = 0;
+                result.ErrorMessage = $"Error inesperado: {ex.Message}";
+            }
+            return result;
+        }
     }
 }

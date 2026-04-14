@@ -13,7 +13,7 @@ namespace DeskApp.Configuration
 
         private AppConfiguration()
         {
-            ApiBaseUrl = "https://1e8d-2806-265-b4a2-1935-9a28-a6ff-fe02-9d72.ngrok-free.app/api";
+            ApiBaseUrl = "https://fa6e-2806-265-b4a2-1935-9a28-a6ff-fe02-9d72.ngrok-free.app/api";
             UsersEndpoint = "/users/";
             LoginEndpoint = "/users/login";
 

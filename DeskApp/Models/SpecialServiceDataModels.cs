@@ -17,6 +17,18 @@ namespace DeskApp.Models
         [JsonPropertyName("id_print")]
         public int IdPrint { get; set; }
 
+        [JsonPropertyName("type")]
+        public string? Type { get; set; }
+
+        [JsonPropertyName("mode")]
+        public string? Mode { get; set; }
+
+        [JsonPropertyName("delivery")]
+        public DateTime? Delivery { get; set; }
+
+        [JsonPropertyName("observations")]
+        public string? Observations { get; set; }
+
         [JsonPropertyName("status")]
         public string? Status { get; set; }
 
@@ -25,6 +37,18 @@ namespace DeskApp.Models
 
         [JsonPropertyName("data")]
         public SpecialServiceLinkData? Data { get; set; }
+
+        [JsonPropertyName("bound")]
+        public SpecialServiceBoundData? Bound { get; set; }
+
+        [JsonPropertyName("spiral")]
+        public SpecialServiceSpiralData? Spiral { get; set; }
+
+        [JsonPropertyName("document")]
+        public SpecialServiceDocumentData? Document { get; set; }
+
+        [JsonPropertyName("photo")]
+        public SpecialServicePhotoData? Photo { get; set; }
 
         [JsonPropertyName("special_service")]
         public SpecialService? SpecialService { get; set; }
@@ -74,6 +98,18 @@ namespace DeskApp.Models
         [JsonPropertyName("id_special_service")]
         public int IdSpecialService { get; set; }
 
+        [JsonPropertyName("type")]
+        public string? Type { get; set; }
+
+        [JsonPropertyName("mode")]
+        public string? Mode { get; set; }
+
+        [JsonPropertyName("delivery")]
+        public DateTime? Delivery { get; set; }
+
+        [JsonPropertyName("observations")]
+        public string? Observations { get; set; }
+
         [JsonPropertyName("status")]
         public string? Status { get; set; }
 
@@ -82,5 +118,17 @@ namespace DeskApp.Models
 
         [JsonPropertyName("updated_at")]
         public DateTime? UpdatedAt { get; set; }
+
+        [JsonPropertyName("bound")]
+        public SpecialServiceBoundData? Bound { get; set; }
+
+        [JsonPropertyName("spiral")]
+        public SpecialServiceSpiralData? Spiral { get; set; }
+
+        [JsonPropertyName("document")]
+        public SpecialServiceDocumentData? Document { get; set; }
+
+        [JsonPropertyName("photo")]
+        public SpecialServicePhotoData? Photo { get; set; }
     }
 }

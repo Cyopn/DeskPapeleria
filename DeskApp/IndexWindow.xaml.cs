@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,10 +16,14 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using ClosedXML.Excel;
+using Microsoft.Win32;
+using LiveCharts;
+using LiveCharts.Wpf;
+using PdfSharpCore.Drawing;
+using PdfSharpCore.Pdf;
 using System.Printing;
 using System.Management;
-using System.Net.NetworkInformation;
-using System.Text.RegularExpressions;
 using DeskApp.Models;
 using DeskApp.Services;
 
@@ -36,12 +43,22 @@ namespace DeskApp
         private ICollectionView? _printersView;
         private ICollectionView? _transactionsView;
         private string _transactionSearchField = "all";
+        private DashboardMetricsSnapshot? _latestMetrics;
 
         public ObservableCollection<UserData> Users { get; } = new();
         public ObservableCollection<UserData> OtherUsers { get; } = new();
         public ObservableCollection<ProductData> Products { get; } = new();
         public ObservableCollection<PrinterData> Printers { get; } = new();
         public ObservableCollection<TransactionData> Transactions { get; } = new();
+
+        private SeriesCollection salesByDaySeries;
+        private SeriesCollection paymentMethodSeries;
+        private SeriesCollection topProductsSeries;
+        private SeriesCollection transactionTypeSeries;
+        private string[] salesByDayLabels;
+        private string[] topProductsLabels;
+        private string[] paymentMethodLabels;
+        private string[] transactionTypeLabels;
 
         public IndexWindow()
         {
@@ -68,7 +85,6 @@ namespace DeskApp
                 this.Close();
                 return;
             }
-
             SetActiveTab(EmpleadosButton, Tab1Content);
 
             if (_sessionService.CurrentUser != null)
@@ -83,6 +99,11 @@ namespace DeskApp
             _ = LoadProductsAsync();
             _ = LoadPrintersAsync();
             _ = LoadTransactionsAsync();
+        }
+
+        private void ReloadDashboardButton_Click(object sender, RoutedEventArgs e)
+        {
+            _ = LoadDashboardData();
         }
 
         private async Task LoadUsersAsync()
@@ -374,6 +395,9 @@ namespace DeskApp
                     case "Usuarios":
                         SetActiveTab(UsuariosButton, Tab5Content);
                         break;
+                    case "Dashboard":
+                        DashboardButton_Click(sender, e);
+                        break;
                 }
             }
         }
@@ -398,6 +422,7 @@ namespace DeskApp
             Tab3Content.Visibility = Visibility.Collapsed;
             Tab4Content.Visibility = Visibility.Collapsed;
             Tab5Content.Visibility = Visibility.Collapsed;
+            Tab6Content.Visibility = Visibility.Collapsed;
             var baseStyle = (Style)FindResource("MenuButtonStyle");
             EmpleadosButton.Style = baseStyle;
             ProductosButton.Style = baseStyle;
@@ -962,13 +987,7 @@ namespace DeskApp
             var type = tx.Type.ToString().ToLowerInvariant();
             var status = tx.Status.ToString().ToLowerInvariant();
             var payment = tx.PaymentMethod?.Trim().ToLowerInvariant() ?? string.Empty;
-            var paymentDisplay = payment switch
-            {
-                "cash" => "efectivo",
-                "card" => "tarjeta",
-                "transfer" => "transferencia",
-                _ => payment
-            };
+            var paymentDisplay = FormatPaymentMethodDisplay(tx.PaymentMethod).ToLowerInvariant();
             var idTransaction = tx.IdTransaction.ToString();
             var idUserPrimary = tx.IdUser?.ToString() ?? string.Empty;
             var idUserFromUser = tx.User?.IdUser.ToString() ?? string.Empty;
@@ -1004,5 +1023,571 @@ namespace DeskApp
             };
         }
 
+        private void DashboardButton_Click(object sender, RoutedEventArgs e)
+        {
+            SetActiveTab(UsuariosButton, Tab6Content);
+            Tab6Content.Visibility = Visibility.Visible;
+            LoadDashboardData();
+        }
+
+        private async Task LoadDashboardData()
+        {
+            try
+            {
+                var token = _sessionService.Token ?? string.Empty;
+                var result = await _apiService.GetTransactionsDetailsAsync(token);
+                if (result.Success && result.Data != null)
+                {
+                    var transactions = result.Data;
+                    var (fromDate, toDate, periodLabel) = GetDashboardPeriodFilter();
+                    transactions = transactions
+                        .Where(t => (!fromDate.HasValue || t.Date.Date >= fromDate.Value)
+                                    && (!toDate.HasValue || t.Date.Date <= toDate.Value))
+                        .ToList();
+
+                    if (transactions.Count == 0)
+                    {
+                        DashboardTotalTransactions.Text = $"No hay datos para el período seleccionado ({periodLabel}).";
+                        DashboardTotalAmount.Text = string.Empty;
+                        DashboardCompletedCount.Text = string.Empty;
+                        DashboardPendingCount.Text = string.Empty;
+                        return;
+                    }
+
+                    DashboardTotalTransactions.Text = $"Total de transacciones: {transactions.Count}";
+                    DashboardTotalAmount.Text = $"Monto total: {transactions.Sum(t => t.Total):C}";
+                    DashboardCompletedCount.Text = $"Completadas: {transactions.Count(t => t.Status == TransactionStatusEnum.Completed)}";
+                    DashboardPendingCount.Text = $"Pendientes: {transactions.Count(t => t.Status == TransactionStatusEnum.Pending)}";
+
+                    var groupedByDay = transactions
+                        .GroupBy(t => t.Date.Date)
+                        .OrderBy(g => g.Key)
+                        .Select(g => new
+                        {
+                            Date = g.Key,
+                            Label = g.Key.ToString("dd/MM"),
+                            Total = g.Sum(t => t.Total),
+                            Count = g.Count()
+                        })
+                        .ToList();
+
+                    var hasDayData = groupedByDay.Count > 0;
+                    var salesOverTimeList = hasDayData
+                        ? groupedByDay.Select(g => (Label: g.Label, Total: g.Total)).ToList()
+                        : new List<(string Label, decimal Total)> { ("Sin datos", 0m) };
+                    var dayLabels = salesOverTimeList.Select(g => g.Label).ToArray();
+                    var dayTotals = salesOverTimeList.Select(g => g.Total).ToList();
+
+                    var avgByDay = hasDayData
+                        ? groupedByDay.Select(g => g.Total / Math.Max(g.Count, 1)).ToList()
+                        : new List<decimal> { 0m };
+                    AverageTicketLineChart.Series = new SeriesCollection
+                    {
+                        new LineSeries
+                        {
+                            Title = "Ticket promedio",
+                            Values = new ChartValues<decimal>(avgByDay)
+                        }
+                    };
+                    AverageTicketLineChart.AxisX.Clear();
+                    AverageTicketLineChart.AxisX.Add(new Axis { Labels = dayLabels, FontSize = 13, Foreground = new SolidColorBrush(Color.FromRgb(51,51,51)) });
+                    AverageTicketLineChart.AxisY.Clear();
+                    AverageTicketLineChart.AxisY.Add(new Axis { Title = "Monto (MXN)", LabelFormatter = value => value.ToString("C"), FontSize = 13, Foreground = new SolidColorBrush(Color.FromRgb(51,51,51)) });
+
+                    var ticketAverage = transactions.Count == 0 ? 0m : transactions.Sum(t => t.Total) / transactions.Count;
+                    TicketAverageValue.Text = $"Ingresos promedio (general: {ticketAverage:C})";
+
+                    var accumulatedValues = new ChartValues<decimal>();
+                    decimal runningTotal = 0m;
+                    foreach (var slice in salesOverTimeList)
+                    {
+                        runningTotal += slice.Total;
+                        accumulatedValues.Add(runningTotal);
+                    }
+                    var accumulatedList = salesOverTimeList
+                        .Select((slice, index) => (slice.Label, Value: accumulatedValues[index]))
+                        .ToList();
+
+                    SalesOverTimeLineChart.Series = new SeriesCollection
+                    {
+                        new LineSeries
+                        {
+                            Title = "Ventas",
+                            Values = new ChartValues<decimal>(dayTotals)
+                        }
+                    };
+                        SalesOverTimeLineChart.AxisX.Clear();
+                    SalesOverTimeLineChart.AxisX.Add(new Axis { Title = "Fecha", Labels = dayLabels, FontSize = 13, Foreground = new SolidColorBrush(Color.FromRgb(51,51,51)) });
+                    SalesOverTimeLineChart.AxisY.Clear();
+                    SalesOverTimeLineChart.AxisY.Add(new Axis { Title = "Monto (MXN)", LabelFormatter = value => value.ToString("C"), FontSize = 13, Foreground = new SolidColorBrush(Color.FromRgb(51,51,51)) });
+
+                    AccumulatedSalesLineChart.Series = new SeriesCollection
+                    {
+                        new LineSeries
+                        {
+                            Title = "Ingresos acumulados",
+                            Values = accumulatedValues,
+                            LineSmoothness = 0.3,
+                            Fill = new SolidColorBrush(Color.FromArgb(80, 33, 150, 243))
+                        }
+                    };
+                    AccumulatedSalesLineChart.AxisX.Clear();
+                    AccumulatedSalesLineChart.AxisX.Add(new Axis { Title = "Fecha", Labels = dayLabels, FontSize = 13, Foreground = new SolidColorBrush(Color.FromRgb(51,51,51)) });
+                    AccumulatedSalesLineChart.AxisY.Clear();
+                    AccumulatedSalesLineChart.AxisY.Add(new Axis { Title = "Monto (MXN)", LabelFormatter = value => value.ToString("C"), FontSize = 13, Foreground = new SolidColorBrush(Color.FromRgb(51,51,51)) });
+
+                    var transactionCountsList = hasDayData
+                        ? groupedByDay.Select(g => (g.Label, g.Count)).ToList()
+                        : new List<(string Label, int Count)> { ("Sin datos", 0) };
+                    var transactionCounts = transactionCountsList.Select(g => g.Count).ToList();
+                    TransactionsCountByDayColumnChart.Series = new SeriesCollection
+                    {
+                        new ColumnSeries
+                        {
+                            Title = "Transacciones",
+                            Values = new ChartValues<int>(transactionCounts)
+                        }
+                    };
+                    TransactionsCountByDayColumnChart.AxisX.Clear();
+                    TransactionsCountByDayColumnChart.AxisX.Add(new Axis { Title = "Fecha", Labels = transactionCountsList.Select(x => x.Label).ToArray(), FontSize = 13, Foreground = new SolidColorBrush(Color.FromRgb(51,51,51)) });
+                    TransactionsCountByDayColumnChart.AxisY.Clear();
+                    TransactionsCountByDayColumnChart.AxisY.Add(new Axis { Title = "Transacciones", FontSize = 13, Foreground = new SolidColorBrush(Color.FromRgb(51,51,51)) });
+
+                    var hourLookup = transactions
+                        .GroupBy(t => t.Date.Hour)
+                        .ToDictionary(g => g.Key, g => g.Sum(t => t.Total));
+
+                    var hours = Enumerable.Range(0, 24)
+                        .Select(hour => new
+                        {
+                            Hour = hour,
+                            Total = hourLookup.TryGetValue(hour, out var total) ? total : 0m
+                        })
+                        .ToList();
+
+                    SalesByHourLineChart.Series = new SeriesCollection
+                    {
+                        new LineSeries
+                        {
+                            Title = "Ventas por hora",
+                            Values = new ChartValues<decimal>(hours.Select(h => h.Total))
+                        }
+                    };
+                    SalesByHourLineChart.AxisX.Clear();
+                    SalesByHourLineChart.AxisX.Add(new Axis { Title = "Hora", Labels = hours.Select(h => h.Hour.ToString("D2") + ":00").ToArray(), FontSize = 13, Foreground = new SolidColorBrush(Color.FromRgb(51,51,51)) });
+                    SalesByHourLineChart.AxisY.Clear();
+                    SalesByHourLineChart.AxisY.Add(new Axis { Title = "Monto (MXN)", LabelFormatter = value => value.ToString("C"), FontSize = 13, Foreground = new SolidColorBrush(Color.FromRgb(51,51,51)) });
+
+                    var details = transactions.SelectMany(t => t.Details ?? Enumerable.Empty<DetailTransactionData>()).ToList();
+
+                    var categories = details
+                        .GroupBy(d =>
+                        {
+                            if (d?.Product?.Item != null)
+                                return d.Product.Item.Category.ToString();
+
+                            if (d?.Product != null && (d.Product.Type == ProductTypeEnum.Print || d.Product.Print != null))
+                                return "Impresión de documento";
+
+                            if (d?.Product != null && (d.Product.Type == ProductTypeEnum.SpecialService || d.Product.SpecialService != null))
+                                return "Servicio especial";
+
+                            return "Sin categoría";
+                        })
+                         .Select(g => new { Category = g.Key, Quantity = g.Sum(d => d.Amount), Total = g.Sum(d => d.Price * d.Amount) })
+                          .OrderByDescending(x => x.Total)
+                          .ToList();
+                    SalesByCategoryPieChart.Series = new SeriesCollection();
+                    foreach (var group in categories)
+                    {
+                        SalesByCategoryPieChart.Series.Add(new PieSeries { Title = group.Category, Values = new ChartValues<decimal> { group.Total } });
+                    }
+
+                    var paymentGroups = transactions
+                        .GroupBy(t => FormatPaymentMethodDisplay(t.PaymentMethod))
+                         .Select(g => new { Method = g.Key, Total = g.Sum(t => t.Total) })
+                         .OrderByDescending(x => x.Total)
+                         .ToList();
+                    SalesByPaymentMethodPieChart.Series = new SeriesCollection();
+                    foreach (var group in paymentGroups)
+                    {
+                        SalesByPaymentMethodPieChart.Series.Add(new PieSeries { Title = group.Method, Values = new ChartValues<decimal> { group.Total }, DataLabels = true, LabelPoint = chartPoint => string.Format("{0:N2}%", chartPoint.Participation * 100) });
+                    }
+
+                    var topProductsByQuantity = details
+                        .GroupBy(d => d?.Product?.Item?.Name ?? d?.Product?.Description ?? "Sin nombre")
+                        .Select(g => (Product: g.Key, Quantity: g.Sum(d => d.Amount)))
+                        .OrderByDescending(x => x.Quantity)
+                        .Take(10)
+                        .ToList();
+                    if (!topProductsByQuantity.Any())
+                    {
+                        topProductsByQuantity = new List<(string Product, int Quantity)> { ("Sin datos", 0) };
+                    }
+                    TopProductsBarHorizontalChart.Series = new SeriesCollection
+                    {
+                        new RowSeries
+                        {
+                            Title = "Cantidad",
+                            Values = new ChartValues<int>(topProductsByQuantity.Select(x => x.Quantity))
+                        }
+                    };
+                    TopProductsBarHorizontalChart.AxisY.Clear();
+                    TopProductsBarHorizontalChart.AxisY.Add(new Axis { Title = "Producto", Labels = topProductsByQuantity.Select(x => x.Product).ToArray(), FontSize = 13, Foreground = new SolidColorBrush(Color.FromRgb(51,51,51)) });
+                    TopProductsBarHorizontalChart.AxisX.Clear();
+                    TopProductsBarHorizontalChart.AxisX.Add(new Axis { Title = "Cantidad", FontSize = 13, Foreground = new SolidColorBrush(Color.FromRgb(51,51,51)) });
+
+                    var incomeByProduct = details
+                        .GroupBy(d =>
+                        {
+                            if (!string.IsNullOrWhiteSpace(d?.Product?.Item?.Name))
+                                return d.Product.Item.Name!;
+
+                            if (d?.Product != null && (d.Product.Type == ProductTypeEnum.Print || d.Product.Print != null))
+                                return "Impresión de documento";
+
+                            if (d?.Product != null && (d.Product.Type == ProductTypeEnum.SpecialService || d.Product.SpecialService != null))
+                                return "Servicio especial";
+
+                            return d?.Product?.Description ?? "Sin nombre";
+                        })
+                         .Select(g => (Product: g.Key, Quantity: g.Sum(d => d.Amount), Total: g.Sum(d => d.Price * d.Amount)))
+                          .OrderByDescending(x => x.Total)
+                          .Take(10)
+                          .ToList();
+                    if (!incomeByProduct.Any())
+                    {
+                        incomeByProduct = new List<(string Product, int Quantity, decimal Total)> { ("Sin datos", 0, 0m) };
+                    }
+                    IncomeByProductBarChart.Series = new SeriesCollection
+                    {
+                        new ColumnSeries
+                        {
+                            Title = "Ingresos",
+                            Values = new ChartValues<decimal>(incomeByProduct.Select(x => x.Total))
+                        }
+                    };
+                    IncomeByProductBarChart.AxisX.Clear();
+                    IncomeByProductBarChart.AxisX.Add(new Axis { Title = "Producto", Labels = incomeByProduct.Select(x => x.Product).ToArray(), FontSize = 13, Foreground = new SolidColorBrush(Color.FromRgb(51,51,51)) });
+                    IncomeByProductBarChart.AxisY.Clear();
+                    IncomeByProductBarChart.AxisY.Add(new Axis { Title = "Monto (MXN)", LabelFormatter = value => value.ToString("C"), FontSize = 13, Foreground = new SolidColorBrush(Color.FromRgb(51,51,51)) });
+
+                    var histogramRanges = new[]
+                    {
+                        (Label: "$0–50", Min: 0m, Max: 50m),
+                        (Label: "$50–100", Min: 50m, Max: 100m),
+                        (Label: "$100–300", Min: 100m, Max: 300m),
+                        (Label: "> $300", Min: 300m, Max: decimal.MaxValue)
+                    };
+                    var histogramData = histogramRanges
+                        .Select(range => new
+                        {
+                            range.Label,
+                            Count = transactions.Count(t => t.Total >= range.Min && (range.Max == decimal.MaxValue ? t.Total >= range.Min : t.Total < range.Max))
+                        })
+                        .ToList();
+                    var transactionRows = transactions
+                        .Select(t => new DashboardMetricsSnapshot.TransactionRow
+                        {
+                            Id = t.IdTransaction,
+                            Type = t.Type.ToString(),
+                            Product = t.ProductTypeDisplay,
+                            Date = t.Date.ToString("g"),
+                            User = FormatTransactionUserDisplay(t),
+                            Total = t.Total,
+                            Status = FormatTransactionStatusDisplay(t.Status),
+                            PaymentMethod = FormatPaymentMethodDisplay(t.PaymentMethod)
+                         })
+                         .ToList();
+                     PurchaseSizeHistogramChart.Series = new SeriesCollection
+                     {
+                         new ColumnSeries
+                         {
+                             Title = "Cantidad",
+                             Values = new ChartValues<int>(histogramData.Select(x => x.Count))
+                         }
+                     };
+                    PurchaseSizeHistogramChart.AxisX.Clear();
+                    PurchaseSizeHistogramChart.AxisX.Add(new Axis { Title = "Rango", Labels = histogramData.Select(x => x.Label).ToArray(), FontSize = 13, Foreground = new SolidColorBrush(Color.FromRgb(51,51,51)) });
+                    PurchaseSizeHistogramChart.AxisY.Clear();
+                    PurchaseSizeHistogramChart.AxisY.Add(new Axis { Title = "Cantidad", FontSize = 13, Foreground = new SolidColorBrush(Color.FromRgb(51,51,51)) });
+
+                    _latestMetrics = new DashboardMetricsSnapshot
+                    {
+                        GeneratedAt = DateTime.Now,
+                        TotalTransactions = transactions.Count,
+                        TotalAmount = transactions.Sum(t => t.Total),
+                        TicketAverage = ticketAverage,
+                        SalesOverTime = salesOverTimeList,
+                        AccumulatedSales = accumulatedList,
+                        SalesByHour = hours.Select(h => ($"{h.Hour:D2}:00", h.Total)).ToList(),
+                        SalesByCategory = categories.Select(c => (c.Category, c.Total)).ToList(),
+                        PaymentMethods = paymentGroups.Select(p => (p.Method, p.Total)).ToList(),
+                        TopProducts = topProductsByQuantity.ToList(),
+                        IncomeByProduct = incomeByProduct.Select(x => (x.Product, x.Total)).ToList(),
+                        SalesByCategoryDetailed = categories.Select(c => (c.Category, c.Quantity, c.Total)).ToList(),
+                        IncomeByProductDetailed = incomeByProduct.Select(x => (x.Product, x.Quantity, x.Total)).ToList(),
+                        TransactionsByDay = transactionCountsList.ToList(),
+                        PurchaseSizeDistribution = histogramData.Select(x => (x.Label, x.Count)).ToList(),
+                        TransactionsLog = transactionRows
+                     };
+                }
+                else
+                {
+                    DashboardTotalTransactions.Text = "No se pudo cargar el dashboard.";
+                }
+            }
+            catch (Exception ex)
+            {
+                DashboardTotalTransactions.Text = $"Error: {ex.Message}";
+            }
+        }
+
+        private void ExportMetricsToExcel_Click(object sender, RoutedEventArgs e)
+        {
+            if (_latestMetrics == null)
+            {
+                ToastNotification.Show("Carga el dashboard antes de exportar métricas.", ToastType.Warning, 3);
+                return;
+            }
+
+            var dialog = new SaveFileDialog
+            {
+                Filter = "Excel workbook (*.xlsx)|*.xlsx",
+                FileName = $"metricas-dashboard-{DateTime.Now:yyyyMMdd_HHmm}.xlsx",
+                DefaultExt = ".xlsx"
+            };
+
+            if (dialog.ShowDialog() != true)
+                return;
+
+            try
+            {
+                using var workbook = new XLWorkbook();
+                var summarySheet = workbook.AddWorksheet("Resumen");
+                summarySheet.Cell(1, 1).Value = "Métrica";
+                summarySheet.Cell(1, 2).Value = "Valor";
+                summarySheet.Cell(2, 1).Value = "Total transacciones";
+                summarySheet.Cell(2, 2).Value = _latestMetrics.TotalTransactions;
+                summarySheet.Cell(3, 1).Value = "Ingresos totales";
+                summarySheet.Cell(3, 2).Value = _latestMetrics.TotalAmount;
+                summarySheet.Cell(4, 1).Value = "Ticket promedio";
+                summarySheet.Cell(4, 2).Value = _latestMetrics.TicketAverage;
+                summarySheet.Cell(5, 1).Value = "Generado el";
+                summarySheet.Cell(5, 2).Value = _latestMetrics.GeneratedAt.ToString("g");
+
+                summarySheet.Cell(7, 1).Value = "Tamaño de compra";
+                summarySheet.Cell(8, 1).Value = "Rango";
+                summarySheet.Cell(8, 2).Value = "Cantidad";
+
+                var summaryRow = 9;
+                foreach (var item in _latestMetrics.PurchaseSizeDistribution)
+                {
+                    summarySheet.Cell(summaryRow, 1).Value = item.Label;
+                    summarySheet.Cell(summaryRow, 2).Value = item.Count;
+                    summaryRow++;
+                }
+                 summarySheet.Columns().AdjustToContents();
+
+                void FillTransactionSheet(IEnumerable<DashboardMetricsSnapshot.TransactionRow> values)
+                {
+                    var sheet = workbook.AddWorksheet("Transacciones");
+                    var headers = new[] { "ID", "Tipo", "Producto", "Fecha", "Usuario", "Total", "Estado", "Método pago" };
+                    for (var i = 0; i < headers.Length; i++)
+                    {
+                        sheet.Cell(1, i + 1).Value = headers[i];
+                    }
+
+                    var row = 2;
+                    foreach (var item in values)
+                    {
+                        sheet.Cell(row, 1).Value = item.Id;
+                        sheet.Cell(row, 2).Value = item.Type;
+                        sheet.Cell(row, 3).Value = item.Product;
+                        sheet.Cell(row, 4).Value = item.Date;
+                        sheet.Cell(row, 5).Value = item.User;
+                        sheet.Cell(row, 6).Value = item.Total;
+                        sheet.Cell(row, 7).Value = item.Status;
+                        sheet.Cell(row, 8).Value = item.PaymentMethod;
+                        row++;
+                    }
+
+                    sheet.Column(6).Style.NumberFormat.Format = "$ #,##0.00";
+                    sheet.Columns().AdjustToContents();
+                }
+
+                void FillTemporalSheet(
+                    string title,
+                    IEnumerable<(string Label, decimal Value)> sales,
+                    IEnumerable<(string Label, int Value)> transactions,
+                    IEnumerable<(string Label, decimal Value)> accumulated)
+                {
+                    var sheet = workbook.AddWorksheet(title);
+                    sheet.Cell(1, 1).Value = "Fecha";
+                    sheet.Cell(1, 2).Value = "Ventas";
+                    sheet.Cell(1, 3).Value = "Transacciones";
+                    sheet.Cell(1, 4).Value = "Ingresos acumulados";
+
+                    var salesDict = sales.ToDictionary(x => x.Label, x => x.Value);
+                    var transactionsDict = transactions.ToDictionary(x => x.Label, x => x.Value);
+                    var accumulatedDict = accumulated.ToDictionary(x => x.Label, x => x.Value);
+
+                    var labels = new List<string>();
+                    var seen = new HashSet<string>();
+
+                    void AddLabels(IEnumerable<string> source)
+                    {
+                        foreach (var label in source)
+                        {
+                            if (label == null || !seen.Add(label))
+                                continue;
+
+                            labels.Add(label);
+                        }
+                    }
+
+                    AddLabels(salesDict.Keys);
+                    AddLabels(transactionsDict.Keys);
+                    AddLabels(accumulatedDict.Keys);
+
+                    var row = 2;
+                    foreach (var label in labels)
+                    {
+                        sheet.Cell(row, 1).Value = label;
+                        sheet.Cell(row, 2).Value = salesDict.TryGetValue(label, out var salesValue) ? salesValue : 0m;
+                        sheet.Cell(row, 3).Value = transactionsDict.TryGetValue(label, out var txValue) ? txValue : 0;
+                        sheet.Cell(row, 4).Value = accumulatedDict.TryGetValue(label, out var accValue) ? accValue : 0m;
+                        row++;
+                    }
+
+                    sheet.Columns(2, 2).Style.NumberFormat.Format = "$ #,##0.00";
+                    sheet.Columns(4, 4).Style.NumberFormat.Format = "$ #,##0.00";
+                    sheet.Columns(1, 4).AdjustToContents();
+                }
+
+                void FillQuantityDecimalSheet(string title, string columnA, string columnB, string columnC, IEnumerable<(string Label, int Quantity, decimal Total)> values)
+                {
+                    var sheet = workbook.AddWorksheet(title);
+                    sheet.Cell(1, 1).Value = columnA;
+                    sheet.Cell(1, 2).Value = columnB;
+                    sheet.Cell(1, 3).Value = columnC;
+                    var row = 2;
+                    foreach (var value in values)
+                    {
+                        sheet.Cell(row, 1).Value = value.Label;
+                        sheet.Cell(row, 2).Value = value.Quantity;
+                        sheet.Cell(row, 3).Value = value.Total;
+                        row++;
+                    }
+                    sheet.Column(3).Style.NumberFormat.Format = "$ #,##0.00";
+                    sheet.Columns(1, 3).AdjustToContents();
+                }
+
+                FillTemporalSheet("Evolución temporal", _latestMetrics.SalesOverTime, _latestMetrics.TransactionsByDay, _latestMetrics.AccumulatedSales);
+                FillQuantityDecimalSheet("Ventas por categoría", "Categoría", "Cantidad", "Ingresos", _latestMetrics.SalesByCategoryDetailed);
+                FillQuantityDecimalSheet("Ventas por producto", "Producto", "Cantidad", "Ingresos", _latestMetrics.IncomeByProductDetailed.Select(p => (p.Product, p.Quantity, p.Revenue)));
+                FillTransactionSheet(_latestMetrics.TransactionsLog);
+ 
+                workbook.SaveAs(dialog.FileName);
+                ToastNotification.Show("Métricas exportadas a Excel correctamente.", ToastType.Success, 3);
+            }
+            catch (Exception ex)
+            {
+                ToastNotification.Show($"No se pudo exportar el archivo: {ex.Message}", ToastType.Error, 4);
+            }
+        }
+
+        private static string FormatTransactionStatusDisplay(TransactionStatusEnum status)
+        {
+            return status switch
+            {
+                TransactionStatusEnum.Pending => "Pendiente",
+                TransactionStatusEnum.Completed => "Completada",
+                _ => status.ToString()
+            };
+        }
+
+        private static string FormatTransactionUserDisplay(TransactionData transaction)
+        {
+            var userId = transaction.User?.IdUser ?? transaction.IdUser;
+            var username = transaction.User?.Username;
+            var userIdText = userId?.ToString() ?? "Sin id";
+            return $"{userIdText}";
+        }
+
+        private static string FormatPaymentMethodDisplay(string? paymentMethod)
+        {
+            var text = paymentMethod?.Trim().ToLowerInvariant();
+            return text switch
+            {
+                "cash" => "Efectivo",
+                "credit_card" => "Tarjeta de crédito",
+                "paypal" => "PayPal",
+                "card" => "Tarjeta de crédito",
+                "transfer" => "Transferencia",
+                null or "" => "Sin método",
+                _ => paymentMethod ?? "Sin método"
+            };
+        }
+
+        private (DateTime? From, DateTime? To, string Label) GetDashboardPeriodFilter()
+        {
+            var mode = GetSelectedFilterTag(DashboardPeriodFilterComboBox);
+            var today = DateTime.Today;
+
+            return mode switch
+            {
+                "today" => (today, today, "Hoy"),
+                "week" => (today.AddDays(-((7 + (int)today.DayOfWeek - (int)DayOfWeek.Monday) % 7)), today, "Esta semana"),
+                "month" => (new DateTime(today.Year, today.Month, 1), today, "Este mes"),
+                "range" => (
+                    DashboardFromDatePicker?.SelectedDate?.Date,
+                    DashboardToDatePicker?.SelectedDate?.Date,
+                    BuildCustomRangeLabel(DashboardFromDatePicker?.SelectedDate?.Date, DashboardToDatePicker?.SelectedDate?.Date)
+                ),
+                _ => (null, null, "Todo el historial")
+            };
+        }
+
+        private static string BuildCustomRangeLabel(DateTime? fromDate, DateTime? toDate)
+        {
+            if (fromDate.HasValue && toDate.HasValue)
+                return $"{fromDate:dd/MM/yyyy} - {toDate:dd/MM/yyyy}";
+            if (fromDate.HasValue)
+                return $"Desde {fromDate:dd/MM/yyyy}";
+            if (toDate.HasValue)
+                return $"Hasta {toDate:dd/MM/yyyy}";
+            return "Rango personalizado";
+        }
+
+        private void DashboardPeriodFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_sessionService == null || _apiService == null)
+                return;
+
+            var mode = GetSelectedFilterTag(DashboardPeriodFilterComboBox);
+            var isRange = mode == "range";
+
+            if (DashboardFromDatePicker != null)
+                DashboardFromDatePicker.Visibility = isRange ? Visibility.Visible : Visibility.Collapsed;
+
+            if (DashboardToDatePicker != null)
+                DashboardToDatePicker.Visibility = isRange ? Visibility.Visible : Visibility.Collapsed;
+
+            if (!isRange)
+            {
+                if (DashboardFromDatePicker != null) DashboardFromDatePicker.SelectedDate = null;
+                if (DashboardToDatePicker != null) DashboardToDatePicker.SelectedDate = null;
+            }
+
+            if (Tab6Content.Visibility == Visibility.Visible)
+                LoadDashboardData();
+        }
+
+        private void DashboardPeriodDatePicker_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (Tab6Content.Visibility == Visibility.Visible)
+                LoadDashboardData();
+        }
     }
-}
+ }

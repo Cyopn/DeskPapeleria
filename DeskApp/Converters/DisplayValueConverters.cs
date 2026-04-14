@@ -98,7 +98,9 @@ namespace DeskApp
             return text switch
             {
                 "cash" => "Efectivo",
-                "card" => "Tarjeta",
+                "credit_card" => "Tarjeta de crédito",
+                "paypal" => "PayPal",
+                "card" => "Tarjeta de crédito",
                 "transfer" => "Transferencia",
                 _ => value?.ToString() ?? string.Empty
             };
@@ -110,7 +112,9 @@ namespace DeskApp
             return text switch
             {
                 "efectivo" => "cash",
-                "tarjeta" => "card",
+                "tarjeta de credito" => "credit_card",
+                "tarjeta de crédito" => "credit_card",
+                "paypal" => "paypal",
                 "transferencia" => "transfer",
                 _ => value?.ToString() ?? string.Empty
             };

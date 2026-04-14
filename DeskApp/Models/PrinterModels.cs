@@ -83,9 +83,9 @@ namespace DeskApp.Models
                 {
                     "usb" => PrinterConnectionType.Usb,
                     "network" => PrinterConnectionType.Network,
-                    "installed" => PrinterConnectionType.Installed,
-                    "unknown" => PrinterConnectionType.Unknown,
-                    _ => PrinterConnectionType.Unknown,
+                    "installed" => PrinterConnectionType.Usb,
+                    "unknown" => PrinterConnectionType.Usb,
+                    _ => PrinterConnectionType.Usb,
                 };
             }
 
@@ -95,22 +95,20 @@ namespace DeskApp.Models
                 {
                     1 => PrinterConnectionType.Usb,
                     2 => PrinterConnectionType.Network,
-                    3 => PrinterConnectionType.Installed,
-                    _ => PrinterConnectionType.Unknown,
+                    3 => PrinterConnectionType.Usb,
+                    _ => PrinterConnectionType.Usb,
                 };
             }
 
-            return PrinterConnectionType.Unknown;
+            return PrinterConnectionType.Usb;
         }
 
         public override void Write(Utf8JsonWriter writer, PrinterConnectionType value, JsonSerializerOptions options)
         {
             var s = value switch
             {
-                PrinterConnectionType.Usb => "usb",
                 PrinterConnectionType.Network => "network",
-                PrinterConnectionType.Installed => "installed",
-                _ => "unknown",
+                _ => "usb",
             };
             writer.WriteStringValue(s);
         }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
+using System.Windows.Media;
 using DeskApp.Configuration;
 using DeskApp.Models;
 using DeskApp.Services;
@@ -20,8 +21,8 @@ namespace DeskApp
         public TransactionData Transaction { get; }
         public ObservableCollection<TransactionDetailRow> Items { get; } = new();
 
-        public string HeaderLine => $"Transacción #{Transaction.IdTransaction} · {Transaction.Type} · {Transaction.Total:C}";
-        public string MetaLine => $"Usuario: {GetUserDisplay()} · Estado: {Transaction.Status} · Pago: {GetPaymentMethodDisplay(Transaction.PaymentMethod)}";
+        public string HeaderLine => $"Transacciï¿½n #{Transaction.IdTransaction} ï¿½ {Transaction.Type} ï¿½ {Transaction.Total:C}";
+        public string MetaLine => $"Usuario: {GetUserDisplay()} ï¿½ Estado: {Transaction.Status} ï¿½ Pago: {GetPaymentMethodDisplay(Transaction.PaymentMethod)}";
         public string FooterLine => $"Fecha: {Transaction.Date:g}";
 
         public TransactionDetailsWindow(TransactionData transaction)
@@ -37,6 +38,66 @@ namespace DeskApp
 
             LoadRows();
             LoadQrImage();
+        }
+
+        private static T? FindVisualParent<T>(System.Windows.DependencyObject? child) where T : System.Windows.DependencyObject
+        {
+            while (child != null)
+            {
+                if (child is T parent)
+                    return parent;
+
+                child = VisualTreeHelper.GetParent(child);
+            }
+
+            return null;
+        }
+
+        private void DetailsDataGrid_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            var dg = sender as System.Windows.Controls.DataGrid;
+            if (dg == null)
+                return;
+
+            if (dg.SelectedItem is TransactionDetailRow row)
+            {
+                if (!row.IsSpecialService)
+                    return;
+
+                var detail = Transaction.Details?.FirstOrDefault(d => d.IdDetailTransaction == row.DetailId);
+                var product = detail?.Product;
+                SpecialServiceData? special = product?.SpecialService;
+
+                var win = new SpecialServiceDetailsWindow(special)
+                {
+                    Owner = this
+                };
+                win.ShowDialog();
+            }
+        }
+
+        private async void DetailsDataGrid_PreviewMouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (sender is not System.Windows.Controls.DataGrid)
+                return;
+
+            var source = e.OriginalSource as System.Windows.DependencyObject;
+            var row = FindVisualParent<System.Windows.Controls.DataGridRow>(source);
+            if (row?.Item is not TransactionDetailRow selected)
+                return;
+
+            if (!selected.IsSpecialService)
+                return;
+
+            var detail = Transaction.Details?.FirstOrDefault(d => d.IdDetailTransaction == selected.DetailId);
+            var product = detail?.Product;
+            SpecialServiceData? special = product?.SpecialService;
+
+            var win = new SpecialServiceDetailsWindow(special)
+            {
+                Owner = this
+            };
+            win.ShowDialog();
         }
 
         private void UpdateActionButtons()
@@ -263,6 +324,7 @@ namespace DeskApp
                     ShowPreviewButton = showPreviewButton
                 });
             }
+
         }
 
         private static string GetProductTypeDisplay(ProductData? product)
@@ -271,7 +333,15 @@ namespace DeskApp
                 return "No aplica";
 
             if (product.SpecialService != null || product.Type == ProductTypeEnum.SpecialService)
+            {
+                var ssType = product.SpecialService?.Type?.Trim();
+                if (!string.IsNullOrWhiteSpace(ssType))
+                {
+                    return $"Servicio especial ({ssType})";
+                }
+
                 return "Servicio especial";
+            }
 
             if (product.Print != null || product.Type == ProductTypeEnum.Print)
                 return "Impresion";
@@ -427,7 +497,7 @@ namespace DeskApp
 
                 if (printedCount == 0)
                 {
-                    ToastNotification.Show("No se pudo enviar ningún archivo a impresión", ToastType.Error, 4);
+                    ToastNotification.Show("No se pudo enviar ningï¿½n archivo a impresiï¿½n", ToastType.Error, 4);
                     return;
                 }
 
@@ -474,11 +544,11 @@ namespace DeskApp
                 UpdateActionButtons();
                 if (filePatchErrors == 0)
                 {
-                    ToastNotification.Show("Impresión completada y archivos marcados como inactivos", ToastType.Success, 4);
+                    ToastNotification.Show("Impresiï¿½n completada y archivos marcados como inactivos", ToastType.Success, 4);
                 }
                 else
                 {
-                    ToastNotification.Show("Impresión completada, pero hubo errores al actualizar algunos archivos", ToastType.Warning, 4);
+                    ToastNotification.Show("Impresiï¿½n completada, pero hubo errores al actualizar algunos archivos", ToastType.Warning, 4);
                 }
             }
             catch (Exception ex)
@@ -591,7 +661,9 @@ namespace DeskApp
             return text switch
             {
                 "cash" => "Efectivo",
-                "card" => "Tarjeta",
+                "credit_card" => "Tarjeta de crï¿½dito",
+                "paypal" => "PayPal",
+                "card" => "Tarjeta de crï¿½dito",
                 "transfer" => "Transferencia",
                 null or "" => "No aplica",
                 _ => paymentMethod ?? "No aplica"
@@ -618,12 +690,12 @@ namespace DeskApp
         {
             if (Transaction.Status == TransactionStatusEnum.Completed)
             {
-                ToastNotification.Show("La transacción ya está completada", ToastType.Info, 3);
+                ToastNotification.Show("La transacciï¿½n ya estï¿½ completada", ToastType.Info, 3);
                 return;
             }
 
             var confirm = MessageBox.Show(
-                $"¿Completar la compra #{Transaction.IdTransaction}?",
+                $"ï¿½Completar la compra #{Transaction.IdTransaction}?",
                 "Confirmar",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question);
@@ -666,7 +738,7 @@ namespace DeskApp
             }
 
             var confirm = MessageBox.Show(
-                $"¿Completar servicio especial para {pendingProductIds.Count} producto(s)?",
+                $"ï¿½Completar servicio especial para {pendingProductIds.Count} producto(s)?",
                 "Confirmar",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question);
@@ -700,7 +772,7 @@ namespace DeskApp
                 }
                 else
                 {
-                    ToastNotification.Show("Se completó el servicio especial, pero hubo errores en algunos productos", ToastType.Warning, 4);
+                    ToastNotification.Show("Se completï¿½ el servicio especial, pero hubo errores en algunos productos", ToastType.Warning, 4);
                 }
 
                 UpdateActionButtons();

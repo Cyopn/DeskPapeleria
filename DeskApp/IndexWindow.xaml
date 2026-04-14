@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:DeskApp"
+    xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="IndexWindow"
     Width="1500"
@@ -80,8 +81,15 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="MenuItem">
-                        <Border x:Name="ItemBorder" Background="{TemplateBinding Background}" CornerRadius="12" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter ContentSource="Header" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                        <Border
+                            x:Name="ItemBorder"
+                            Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="12">
+                            <ContentPresenter
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                ContentSource="Header" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsHighlighted" Value="True">
@@ -308,8 +316,18 @@
                             Style="{StaticResource MenuButtonStyle}"
                             Tag="Otros">
                             <Button.ContextMenu>
-                                <ContextMenu Style="{StaticResource OtrosContextMenuStyle}" Placement="Bottom" StaysOpen="False">
-                                    <MenuItem Click="LogoutButton_Click" Header="Cerrar sesión" Style="{StaticResource OtrosMenuItemStyle}" />
+                                <ContextMenu
+                                    Placement="Bottom"
+                                    StaysOpen="False"
+                                    Style="{StaticResource OtrosContextMenuStyle}">
+                                    <MenuItem
+                                        Click="DashboardButton_Click"
+                                        Header="Ver Dashboard"
+                                        Style="{StaticResource OtrosMenuItemStyle}" />
+                                    <MenuItem
+                                        Click="LogoutButton_Click"
+                                        Header="Cerrar sesión"
+                                        Style="{StaticResource OtrosMenuItemStyle}" />
                                 </ContextMenu>
                             </Button.ContextMenu>
                             <Grid>
@@ -341,7 +359,7 @@
                 BorderThickness="1,0,1,1"
                 CornerRadius="20,20,20,20">
                 <Grid>
-                    <Grid x:Name="Tab1Content" Visibility="Visible">
+                    <Grid x:Name="Tab1Content" Visibility="Collapsed">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
@@ -1331,16 +1349,28 @@
                                                 <Trigger.EnterActions>
                                                     <BeginStoryboard>
                                                         <Storyboard>
-                                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.01" Duration="0:0:0.12" />
-                                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.01" Duration="0:0:0.12" />
+                                                            <DoubleAnimation
+                                                                Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                                                To="1.01"
+                                                                Duration="0:0:0.12" />
+                                                            <DoubleAnimation
+                                                                Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                                To="1.01"
+                                                                Duration="0:0:0.12" />
                                                         </Storyboard>
                                                     </BeginStoryboard>
                                                 </Trigger.EnterActions>
                                                 <Trigger.ExitActions>
                                                     <BeginStoryboard>
                                                         <Storyboard>
-                                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.12" />
-                                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.12" />
+                                                            <DoubleAnimation
+                                                                Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                                                To="1"
+                                                                Duration="0:0:0.12" />
+                                                            <DoubleAnimation
+                                                                Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                                To="1"
+                                                                Duration="0:0:0.12" />
                                                         </Storyboard>
                                                     </BeginStoryboard>
                                                 </Trigger.ExitActions>
@@ -1648,6 +1678,232 @@
                                     </DataGridTemplateColumn>
                                 </DataGrid.Columns>
                             </DataGrid>
+                        </Border>
+                    </Grid>
+
+                    <Grid x:Name="Tab6Content" Visibility="Visible">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <TextBlock
+                            Grid.Row="0"
+                            Margin="20,0"
+                            HorizontalAlignment="Center"
+                            FontSize="24"
+                            FontWeight="Bold"
+                            Foreground="#333333"
+                            Text="Dashboard de Transacciones" />
+                        <Border
+                            Grid.Row="1"
+                            Margin="40"
+                            Padding="20"
+                            Background="#F9F9F9"
+                            CornerRadius="10">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel>
+                                    <TextBlock
+                                        x:Name="DashboardTotalTransactions"
+                                        Margin="0,0,0,5"
+                                        FontSize="20"
+                                        FontWeight="SemiBold" />
+                                    <TextBlock
+                                        x:Name="DashboardTotalAmount"
+                                        Margin="0,0,0,5"
+                                        FontSize="20"
+                                        FontWeight="SemiBold" />
+                                    <TextBlock
+                                        x:Name="DashboardCompletedCount"
+                                        Margin="0,0,0,5"
+                                        FontSize="18" />
+                                    <TextBlock
+                                        x:Name="DashboardPendingCount"
+                                        Margin="0,0,0,5"
+                                        FontSize="18" />
+
+                                    <StackPanel
+                                        Margin="0,0,0,20"
+                                        HorizontalAlignment="Right"
+                                        Orientation="Horizontal">
+                                        <Button
+                                            Margin="0,0,10,0"
+                                            Padding="10,0"
+                                            Background="#1E88E5"
+                                            BorderThickness="0"
+                                            Click="ExportMetricsToExcel_Click"
+                                            Content="Exportar métricas a Excel"
+                                            Cursor="Hand"
+                                            FontSize="16"
+                                            Foreground="White" />
+                                        <Button
+                                            Margin="0,0,10,0"
+                                            Padding="10,0"
+                                            Background="#D9D9D9"
+                                            BorderThickness="0"
+                                            Click="ReloadDashboardButton_Click"
+                                            Content="Recargar gráficas"
+                                            Cursor="Hand"
+                                            FontSize="16"
+                                            Foreground="Black" />
+                                        <StackPanel
+                                            Margin="0,0,0,0"
+                                            HorizontalAlignment="Right"
+                                            Orientation="Horizontal">
+                                            <Border
+                                                Margin="0,0,10,0"
+                                                Padding="6,6"
+                                                Background="#D9D9D9"
+                                                CornerRadius="8">
+                                                <ComboBox
+                                                    x:Name="DashboardPeriodFilterComboBox"
+                                                    MinWidth="170"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    FontSize="14"
+                                                    SelectionChanged="DashboardPeriodFilter_SelectionChanged">
+                                                    <ComboBoxItem
+                                                        Content="Todo el historial"
+                                                        IsSelected="True"
+                                                        Tag="all" />
+                                                    <ComboBoxItem Content="Hoy" Tag="today" />
+                                                    <ComboBoxItem Content="Esta semana" Tag="week" />
+                                                    <ComboBoxItem Content="Este mes" Tag="month" />
+                                                    <ComboBoxItem Content="Rango personalizado" Tag="range" />
+                                                </ComboBox>
+                                            </Border>
+                                            <DatePicker
+                                                x:Name="DashboardFromDatePicker"
+                                                Width="130"
+                                                Margin="0,0,8,0"
+                                                SelectedDateChanged="DashboardPeriodDatePicker_SelectedDateChanged"
+                                                Visibility="Collapsed" />
+                                            <DatePicker
+                                                x:Name="DashboardToDatePicker"
+                                                Width="130"
+                                                Margin="0,0,10,0"
+                                                SelectedDateChanged="DashboardPeriodDatePicker_SelectedDateChanged"
+                                                Visibility="Collapsed" />
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <TextBlock
+                                        Margin="0,0,0,5"
+                                        FontSize="18"
+                                        FontWeight="Bold"
+                                        Text="Ingresos totales en el tiempo" />
+                                    <lvc:CartesianChart
+                                        x:Name="SalesOverTimeLineChart"
+                                        Height="200"
+                                        Margin="0,0,0,10" />
+                                    <TextBlock
+                                        Margin="0,6,0,6"
+                                        FontSize="18"
+                                        FontWeight="Bold"
+                                        Text="Ingresos acumulados" />
+                                    <lvc:CartesianChart
+                                        x:Name="AccumulatedSalesLineChart"
+                                        Height="120"
+                                        Margin="0,0,0,20" />
+
+                                    <UniformGrid Margin="0,0,0,20" Columns="2">
+                                        <StackPanel Margin="10">
+                                            <TextBlock
+                                                x:Name="TicketAverageValue"
+                                                FontSize="18"
+                                                FontWeight="Bold" />
+                                            <lvc:CartesianChart
+                                                x:Name="AverageTicketLineChart"
+                                                Height="200"
+                                                Margin="0,0,0,0" />
+                                        </StackPanel>
+                                        <StackPanel Margin="10">
+                                            <TextBlock
+                                                FontSize="18"
+                                                FontWeight="Bold"
+                                                Text="Ingresos por hora del día" />
+                                            <lvc:CartesianChart
+                                                x:Name="SalesByHourLineChart"
+                                                Height="200"
+                                                Margin="0,0,0,0" />
+                                        </StackPanel>
+                                    </UniformGrid>
+
+                                    <UniformGrid Margin="0,0,0,20" Columns="2">
+                                        <StackPanel Margin="10">
+                                            <TextBlock
+                                                FontSize="18"
+                                                FontWeight="Bold"
+                                                Text="Distribución de métodos de pago" />
+                                            <lvc:PieChart
+                                                x:Name="SalesByPaymentMethodPieChart"
+                                                Height="220"
+                                                Margin="0,10,0,0"
+                                                HoverPushOut="8"
+                                                InnerRadius="60"
+                                                LegendLocation="Right" />
+                                        </StackPanel>
+                                        <StackPanel Margin="10">
+                                            <TextBlock
+                                                FontSize="18"
+                                                FontWeight="Bold"
+                                                Text="Ingresos por categoría" />
+                                            <lvc:PieChart
+                                                x:Name="SalesByCategoryPieChart"
+                                                Height="220"
+                                                Margin="0,10,0,0"
+                                                HoverPushOut="8"
+                                                InnerRadius="60"
+                                                LegendLocation="Right" />
+                                        </StackPanel>
+                                    </UniformGrid>
+
+                                    <UniformGrid Margin="0,0,0,20" Columns="2">
+                                        <StackPanel Margin="10">
+                                            <TextBlock
+                                                FontSize="18"
+                                                FontWeight="Bold"
+                                                Text="Productos más vendidos" />
+                                            <lvc:CartesianChart
+                                                x:Name="TopProductsBarHorizontalChart"
+                                                Height="260"
+                                                Margin="0,10,0,0" />
+                                        </StackPanel>
+                                        <StackPanel Margin="10">
+                                            <TextBlock
+                                                FontSize="18"
+                                                FontWeight="Bold"
+                                                Text="Ingresos por producto" />
+                                            <lvc:CartesianChart
+                                                x:Name="IncomeByProductBarChart"
+                                                Height="220"
+                                                Margin="0,10,0,0" />
+                                        </StackPanel>
+                                    </UniformGrid>
+
+                                    <UniformGrid Margin="0,0,0,20" Columns="2">
+                                        <StackPanel Margin="10">
+                                            <TextBlock
+                                                FontSize="18"
+                                                FontWeight="Bold"
+                                                Text="Número de transacciones" />
+                                            <lvc:CartesianChart
+                                                x:Name="TransactionsCountByDayColumnChart"
+                                                Height="220"
+                                                Margin="0,10,0,0" />
+                                        </StackPanel>
+                                        <StackPanel Margin="10">
+                                            <TextBlock
+                                                FontSize="18"
+                                                FontWeight="Bold"
+                                                Text="Distribución de tamaño de compra" />
+                                            <lvc:CartesianChart
+                                                x:Name="PurchaseSizeHistogramChart"
+                                                Height="220"
+                                                Margin="0,10,0,0" />
+                                        </StackPanel>
+                                    </UniformGrid>
+                                </StackPanel>
+                            </ScrollViewer>
                         </Border>
                     </Grid>
                 </Grid>
